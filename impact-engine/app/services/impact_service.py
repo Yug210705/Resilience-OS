@@ -4,14 +4,34 @@ from app.graph.builder import build_supply_chain_graph
 from app.models import Supplier, Material, SupplierMaterial, Plant, Product, ProductMaterial, Order, Inventory
 import uuid
 
+def analyze_vulnerabilities(db: Session):
+    G = build_supply_chain_graph(db)
+    bc = nx.betweenness_centrality(G)
+    pr = nx.pagerank(G, alpha=0.85)
+    nodes = []
+    for n in G.nodes():
+        node_data = G.nodes[n]
+        if node_data.get("type") in ["supplier", "material", "port", "plant"]:
+            nodes.append({
+                "entity_id": n,
+                "type": node_data.get("type"),
+                "name": node_data.get("label", n),
+                "bottleneck_score": round(bc.get(n, 0) * 100, 2),
+                "systemic_importance_score": round(pr.get(n, 0) * 100, 2),
+                "inherent_risk": node_data.get("risk", 0.0)
+            })
+    return {
+        "analysis_type": "Network Topology Vulnerability",
+        "top_bottlenecks": sorted(nodes, key=lambda x: x["bottleneck_score"], reverse=True)[:10],
+        "top_systemic_risks": sorted(nodes, key=lambda x: x["systemic_importance_score"], reverse=True)[:10]
+    }
+
 def simulate_disruption(db: Session, req):
     G = build_supply_chain_graph(db)
-    
     start_node = f"{req.disruption_type}:{req.affected_entity_id}"
     if start_node not in G:
         raise ValueError("Entity not found in graph")
         
-    # Find all downstream reachable nodes
     impacted_nodes = nx.descendants(G, start_node)
     impacted_nodes.add(start_node)
     
@@ -26,6 +46,7 @@ def simulate_disruption(db: Session, req):
     revenue_at_risk = 0.0
     order_impacts = []
     dependency_paths = []
+    timeline = []
     
     for o_id in affected_orders:
         o_node = f"order:{o_id}"
@@ -70,6 +91,28 @@ def simulate_disruption(db: Session, req):
             avail_inv = max(inv.on_hand_quantity - inv.reserved_quantity, 0) if inv else 0
             runway_days = avail_inv / demand if demand > 0 else 0
             
+            # Generate Day-by-Day Timeline Cascade
+            current_inv = avail_inv
+            for day in range(1, req.duration_days + 1):
+                production_status = "NORMAL"
+                daily_loss = 0
+                
+                current_inv += disrupted_cap
+                if current_inv >= demand:
+                    current_inv -= demand
+                else:
+                    production_status = "HALTED"
+                    daily_loss = demand - current_inv
+                    current_inv = 0
+                    
+                timeline.append({
+                    "day": day,
+                    "material_id": mat_id,
+                    "inventory_eod": current_inv,
+                    "status": production_status,
+                    "shortfall_units": int(daily_loss)
+                })
+            
             material_shortages.append({
                 "material_id": mat_id,
                 "shortage_quantity": int(shortfall_per_day * req.duration_days),
@@ -82,7 +125,7 @@ def simulate_disruption(db: Session, req):
                 "alternative_supplier_ids": alt_sups
             })
 
-    total_prod_loss = 0
+    total_prod_loss = sum(t["shortfall_units"] for t in timeline)
     orders = db.query(Order).filter(Order.id.in_(affected_orders)).all() if affected_orders else []
     for o in orders:
         loss = o.order_value * req.severity
@@ -120,7 +163,7 @@ def simulate_disruption(db: Session, req):
         "production_impact": [],
         "revenue_impact": order_impacts,
         "dependency_paths": dependency_paths,
-        "timeline": [],
+        "timeline": timeline,
         "risk_analysis": {},
         "recovery_context": {
             "material_shortages": material_shortages,
