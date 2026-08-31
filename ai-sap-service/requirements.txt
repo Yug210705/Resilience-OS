@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+anthropic
+structlog
+python-dotenv
+httpx
+sse-starlette
