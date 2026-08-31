@@ -8,6 +8,8 @@ class Supplier(Base):
     name = Column(String)
     country = Column(String)
     region = Column(String)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
     risk_score = Column(Float)
     reliability_score = Column(Float)
     primary_port_id = Column(String, ForeignKey('ports.id'))
@@ -40,6 +42,8 @@ class Plant(Base):
     name = Column(String)
     city = Column(String)
     country = Column(String)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
     daily_capacity = Column(Integer)
     status = Column(String)
 
@@ -92,6 +96,8 @@ class Port(Base):
     name = Column(String)
     country = Column(String)
     region = Column(String)
+    lat = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True)
     risk_score = Column(Float)
 
 class TransportRoute(Base):

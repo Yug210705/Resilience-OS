@@ -11,14 +11,14 @@ def seed():
     # Ports
     ports = []
     for i in range(1, 11):
-        p = Port(id=f"PORT-{i:03d}", name=f"Port {i}", country="Global", region="Region", risk_score=random.uniform(10, 90))
+        p = Port(id=f"PORT-{i:03d}", name=f"Port {i}", country="Global", region="Region", lat=random.uniform(-90, 90), lng=random.uniform(-180, 180), risk_score=random.uniform(10, 90))
         db.add(p)
         ports.append(p)
     
     # Suppliers
     suppliers = []
     for i in range(1, 26):
-        s = Supplier(id=f"SUP-{i:03d}", name=f"Supplier {i}", country="Country", region="Region", risk_score=random.uniform(10, 90), reliability_score=random.uniform(50, 100), primary_port_id=ports[i%10].id, status="ACTIVE")
+        s = Supplier(id=f"SUP-{i:03d}", name=f"Supplier {i}", country="Country", region="Region", lat=random.uniform(-90, 90), lng=random.uniform(-180, 180), risk_score=random.uniform(10, 90), reliability_score=random.uniform(50, 100), primary_port_id=ports[i%10].id, status="ACTIVE")
         db.add(s)
         suppliers.append(s)
         
@@ -40,7 +40,7 @@ def seed():
     # Plants
     plants = []
     for i in range(1, 6):
-        p = Plant(id=f"PLANT-{i:03d}", name=f"Plant {i}", city="City", country="Country", daily_capacity=random.randint(1000, 5000), status="ACTIVE")
+        p = Plant(id=f"PLANT-{i:03d}", name=f"Plant {i}", city="City", country="Country", lat=random.uniform(-90, 90), lng=random.uniform(-180, 180), daily_capacity=random.randint(1000, 5000), status="ACTIVE")
         db.add(p)
         plants.append(p)
         
