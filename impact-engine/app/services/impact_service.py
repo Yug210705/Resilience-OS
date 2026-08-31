@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 import networkx as nx
 from app.graph.builder import build_supply_chain_graph
 from app.models import Supplier, Material, SupplierMaterial, Plant, Product, ProductMaterial, Order, Inventory
+from app.schemas import DisruptionRequest
 import uuid
 
 def analyze_vulnerabilities(db: Session):
@@ -190,3 +191,74 @@ def simulate_disruption(db: Session, req):
             "revenue_exposure": []
         }
     }
+
+def simulate_multi_disruption(db: Session, reqs: list):
+    G = build_supply_chain_graph(db)
+    
+    start_nodes = []
+    for r in reqs:
+        sn = f"{r.disruption_type}:{r.affected_entity_id}"
+        if sn in G:
+            start_nodes.append((sn, r))
+            
+    if not start_nodes:
+        raise ValueError("No valid entities found in graph")
+        
+    impacted_nodes = set()
+    for sn, _ in start_nodes:
+        impacted_nodes.update(nx.descendants(G, sn))
+        impacted_nodes.add(sn)
+        
+    affected_suppliers = [n.split(":")[1] for n in impacted_nodes if n.startswith("supplier:")]
+    affected_materials = [n.split(":")[1] for n in impacted_nodes if n.startswith("material:")]
+    affected_plants = [n.split(":")[1] for n in impacted_nodes if n.startswith("plant:")]
+    affected_products = [n.split(":")[1] for n in impacted_nodes if n.startswith("product:")]
+    affected_orders = [n.split(":")[1] for n in impacted_nodes if n.startswith("order:")]
+    
+    # We will do a simplified unified impact for the multi-vector attack
+    revenue_at_risk = 0.0
+    orders = db.query(Order).filter(Order.id.in_(affected_orders)).all() if affected_orders else []
+    
+    # Max severity across all attacks
+    max_sev = max((r.severity for r in reqs), default=1.0)
+    
+    for o in orders:
+        loss = o.order_value * max_sev
+        revenue_at_risk += loss
+        
+    return {
+        "scenario_name": "Multi-Vector Attack",
+        "attack_vectors": len(reqs),
+        "total_nodes_destroyed": len(impacted_nodes),
+        "cascading_impact": {
+            "affected_suppliers": len(affected_suppliers),
+            "affected_plants": len(affected_plants),
+            "affected_products": len(affected_products),
+            "affected_orders": len(affected_orders),
+            "doomsday_revenue_at_risk": revenue_at_risk
+        }
+    }
+
+def run_chaos_monkey(db: Session):
+    # 1. Use PageRank to find the 3 most systemically important nodes
+    vuln = analyze_vulnerabilities(db)
+    top_3 = vuln["top_systemic_risks"][:3]
+    
+    # 2. Construct a multi-vector attack
+    reqs = []
+    for node in top_3:
+        # Pydantic schema expects (type, id, severity, duration)
+        reqs.append(
+            DisruptionRequest(
+                disruption_type=node["type"],
+                affected_entity_id=node["entity_id"].split(":")[1],
+                severity=1.0,
+                duration_days=30
+            )
+        )
+        
+    # 3. Simulate the unified catastrophe
+    result = simulate_multi_disruption(db, reqs)
+    result["scenario_name"] = "Chaos Monkey Doomsday Simulation"
+    result["targeted_vulnerabilities"] = top_3
+    return result

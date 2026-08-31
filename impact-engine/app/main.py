@@ -96,3 +96,19 @@ async def stream_disruption(websocket: WebSocket, db: Session = Depends(get_db))
         await websocket.send_json({"error": str(e)})
     finally:
         await websocket.close()
+
+from app.schemas import MultiDisruptionRequest
+from app.services.impact_service import simulate_multi_disruption, run_chaos_monkey
+
+@app.post("/api/war-room/simulate-multi", summary="Simulate Simultaneous Multi-Vector Disruptions")
+def war_room_simulate(req: MultiDisruptionRequest, db: Session = Depends(get_db)):
+    return simulate_multi_disruption(db, req.disruptions)
+
+@app.post("/api/war-room/chaos-monkey", summary="Unleash the Supply Chain Chaos Monkey")
+def unleash_chaos_monkey(db: Session = Depends(get_db)):
+    """
+    Uses Graph Theory (PageRank) to automatically identify the 3 most critical systemic 
+    vulnerabilities in the enterprise, and then simultaneously destroys them (Severity 1.0) 
+    to calculate the maximum potential Doomsday impact.
+    """
+    return run_chaos_monkey(db)

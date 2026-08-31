@@ -75,3 +75,7 @@ class DisruptionResponse(BaseModel):
     risk_analysis: dict
     recovery_context: RecoveryContext
     ai_context: AIContext
+
+class MultiDisruptionRequest(BaseModel):
+    name: str = "The Perfect Storm"
+    disruptions: List[DisruptionRequest]

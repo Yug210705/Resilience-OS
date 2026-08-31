@@ -65,8 +65,44 @@ def seed():
         for m in mats:
             db.add(Inventory(id=f"INV-{p.id}-{m.id}", plant_id=p.id, material_id=m.id, on_hand_quantity=random.randint(1000, 10000), reserved_quantity=random.randint(0, 500), safety_stock=500))
 
+    # Transport Routes: Connect ports to plants
+    modes = ["SEA", "AIR", "ROAD", "RAIL"]
+    route_idx = 1
+    for port in ports:
+        # Each port connects to 2-3 plants
+        dest_plants = random.sample(plants, min(random.randint(2, 3), len(plants)))
+        for plant in dest_plants:
+            db.add(TransportRoute(
+                id=f"ROUTE-{route_idx:03d}",
+                origin=port.id,
+                destination=plant.id,
+                mode=random.choice(modes),
+                transit_time_days=random.randint(1, 14),
+                capacity_per_day=random.randint(500, 5000),
+                risk_score=random.uniform(5, 80),
+                status="ACTIVE"
+            ))
+            route_idx += 1
+
     db.commit()
-    print("Database seeded deterministically with 42 seed.")
+    
+    # Print dataset stats
+    from app.models import TransportRoute as TR
+    print("=" * 50)
+    print("RESILIENCE OS — DATASET SEEDED")
+    print("=" * 50)
+    print(f"  Suppliers:           {db.query(Supplier).count()}")
+    print(f"  Materials:           {db.query(Material).count()}")
+    print(f"  Plants:              {db.query(Plant).count()}")
+    print(f"  Products:            {db.query(Product).count()}")
+    print(f"  Orders:              {db.query(Order).count()}")
+    print(f"  Ports:               {db.query(Port).count()}")
+    print(f"  Transport Routes:    {db.query(TR).count()}")
+    print(f"  Supplier-Material:   {db.query(SupplierMaterial).count()}")
+    print(f"  Product-Material:    {db.query(ProductMaterial).count()}")
+    print(f"  Inventory Records:   {db.query(Inventory).count()}")
+    print(f"  Random Seed:         42 (deterministic)")
+    print("=" * 50)
 
 if __name__ == "__main__":
     seed()
