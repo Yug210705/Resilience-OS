@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, HTTPException, Response
 import json
 import os
@@ -7,6 +8,16 @@ from app.services.orchestrator import run_recovery_pipeline, AuditLog
 app = FastAPI(
     title="RESILIENCE OS API",
     description="Deterministic AI Supply Chain Orchestration Layer"
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 @app.post("/run-recovery", response_model=AuditLog, summary="Run Full Recovery Pipeline", description="Executes the 6-step detect/optimize/explain/validate/act/audit pipeline.")
 async def run_recovery(response: Response, material_id: str = "MAT-12"):
     import time

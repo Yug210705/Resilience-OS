@@ -12,7 +12,7 @@ from rich import print as rprint
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from app.models.schemas import DisruptionInput, ImpactInput, RecoveryPlanInput, CounterfactualInput
-import orchestrator
+from app.services import orchestrator
 
 console = Console()
 

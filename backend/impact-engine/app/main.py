@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import Base, engine, get_db
@@ -7,6 +8,14 @@ from app.services.impact_service import simulate_disruption, analyze_vulnerabili
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="RESILIENCE OS - IMPACT ENGINE")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.post("/api/disruptions/simulate", response_model=DisruptionResponse, summary="Simulate Supply Chain Disruption (Deterministic)")
 def simulate(req: DisruptionRequest, db: Session = Depends(get_db)):
