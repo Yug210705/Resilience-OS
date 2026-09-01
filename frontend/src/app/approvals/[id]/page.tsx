@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { Check, X, FileCode2, ArrowRight, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus } from '@/services/api';
+import { fetchRecoveryPlan, updateRecoveryPlanStatus } from '@/services/api';
 
 function PageContent({ id }: { id: string }) {
   const router = useRouter();
@@ -15,14 +15,9 @@ function PageContent({ id }: { id: string }) {
   const [approved, setApproved] = useState(false);
 
   useEffect(() => {
-    fetchPersistedRecoveryPlans()
-      .then(plans => {
-        const p = plans.find((x: any) => x.id === id);
-        if (p) {
-          setPlan(p);
-        } else {
-          setError("Recovery Plan not found.");
-        }
+    fetchRecoveryPlan(id)
+      .then(p => {
+        setPlan(p);
       })
       .catch(err => setError(err.message));
   }, [id]);

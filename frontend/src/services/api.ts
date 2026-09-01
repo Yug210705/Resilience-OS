@@ -91,37 +91,62 @@ export interface RecoveryPlan {
   details?: any;
 }
 
+export interface RecoveryPlanListResponse {
+  items: RecoveryPlan[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+  total_active: number;
+  total_pending_audit: number;
+  total_pending_approval: number;
+  total_completed: number;
+  /** Sum of total_cost (recovery procurement cost) across all matching plans */
+  aggregate_plan_cost: number;
+  /** Sum of total_sla_exposure (SLA penalty risk) across all matching plans */
+  aggregate_sla_exposure: number;
+  /** Alias for aggregate_plan_cost; kept for backward compatibility */
+  aggregate_exposure: number;
+}
+
+export interface FetchRecoveryPlansParams {
+  limit?: number;
+  offset?: number;
+  search?: string;
+  status?: string;
+  disruption_id?: string;
+}
+
 // Fetch all persisted plans for the Workspace
-export async function fetchPersistedRecoveryPlans(): Promise<RecoveryPlan[]> {
-  const res = await fetch(`${AI_API_URL}/api/recovery/plans`);
+export async function fetchPersistedRecoveryPlans(params?: FetchRecoveryPlansParams): Promise<RecoveryPlanListResponse> {
+  const query = new URLSearchParams();
+  if (params?.limit !== undefined) query.append('limit', params.limit.toString());
+  if (params?.offset !== undefined) query.append('offset', params.offset.toString());
+  if (params?.search) query.append('search', params.search);
+  if (params?.status) query.append('status', params.status);
+  if (params?.disruption_id) query.append('disruption_id', params.disruption_id);
+
+  const res = await fetch(`${AI_API_URL}/api/recovery/plans?${query.toString()}`);
   if (!res.ok) throw new Error("Failed to fetch recovery plans");
   const data = await res.json();
   
-  // Legacy payload check (Ghost process issue)
   if (data && data.ranked_plans) {
     throw new Error("API Contract Mismatch: Received legacy candidate options instead of persisted Recovery Plans.");
   }
   
-  let plansArray: any[] = [];
-  
-  if (Array.isArray(data)) {
-    plansArray = data;
-  } else if (data && Array.isArray(data.plans)) {
-    plansArray = data.plans;
-  } else if (data && Array.isArray(data.data)) {
-    plansArray = data.data;
-  } else {
-    throw new Error("API Contract Mismatch: Expected an array of Recovery Plans.");
+  // Basic validation that we received the expected wrapper object
+  if (!data || typeof data.total !== 'number' || !Array.isArray(data.items)) {
+    throw new Error("API Contract Mismatch: Expected a paginated RecoveryPlanListResponse.");
   }
   
-  // Validate that every element has the required fields
-  for (const plan of plansArray) {
-    if (!plan.id || !plan.status) {
-      throw new Error(`API Contract Mismatch: Invalid Recovery Plan record missing 'id' or 'status'. Received: ${JSON.stringify(plan)}`);
-    }
-  }
-  
-  return plansArray as RecoveryPlan[];
+  return data as RecoveryPlanListResponse;
+}
+
+// Fetch single recovery plan by ID
+export async function fetchRecoveryPlan(planId: string): Promise<RecoveryPlan> {
+  const res = await fetch(`${AI_API_URL}/api/recovery/plans/${encodeURIComponent(planId)}`);
+  if (!res.ok) throw new Error("Failed to fetch recovery plan");
+  return res.json();
 }
 
 // Update status

@@ -1,15 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
   ShieldCheck, TrendingDown, Clock, AlertCircle, CheckCircle2, 
   Search, Filter, Activity, MoreVertical, ListChecks, ArrowUpRight, Inbox,
-  Zap, Server, Box, Crosshair
+  Zap, Server, Box, Crosshair, ChevronLeft, ChevronRight, RefreshCw
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
-import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus, RecoveryPlan, RecoveryPlanStatus } from '@/services/api';
+import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus, RecoveryPlan, RecoveryPlanStatus, RecoveryPlanListResponse } from '@/services/api';
 
 function formatStatus(status: RecoveryPlanStatus): string {
   switch (status) {
@@ -56,44 +56,65 @@ function formatDate(iso: string) {
   }
 }
 
+const PAGE_SIZE = 25;
+
 export default function RecoveryPlansWorkspace() {
   const router = useRouter();
-  const [plans, setPlans] = useState<RecoveryPlan[]>([]);
+  const [data, setData] = useState<RecoveryPlanListResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
+  
+  // Pagination & Search & Filter
+  const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [viewStatus, setViewStatus] = useState<string>('ALL');
 
   useEffect(() => {
-    fetchPersistedRecoveryPlans()
-      .then((res) => {
-        setPlans(res || []);
-        if (res && res.length > 0) {
-          setSelectedPlanId(res[0].id);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        const errorObj = err as Error;
-        setError(errorObj.message || 'Unable to load recovery plans.');
-        setLoading(false);
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setPage(1); // Reset page on search change
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const loadData = useCallback(async (currentPage: number, currentSearch: string, currentStatus: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const statusParam = currentStatus === 'ALL' ? undefined : currentStatus;
+      const res = await fetchPersistedRecoveryPlans({
+        limit: PAGE_SIZE,
+        offset: (currentPage - 1) * PAGE_SIZE,
+        search: currentSearch || undefined,
+        status: statusParam
       });
-  }, []);
+      setData(res);
+      
+      // Auto-select first plan if none selected or if current selection is not in the new page
+      // (This handles search/filter changes safely)
+      if (res.items.length > 0) {
+        if (!selectedPlanId || !res.items.find(p => p.id === selectedPlanId)) {
+          setSelectedPlanId(res.items[0].id);
+        }
+      } else {
+        setSelectedPlanId(null);
+      }
+    } catch (err) {
+      const e = err as Error;
+      setError(e.message || 'Unable to load recovery plans.');
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedPlanId]);
 
-  const filteredPlans = plans.filter(p => 
-    p.id.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    p.strategy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.disruption_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.supplier_id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    loadData(page, debouncedSearch, viewStatus);
+  }, [page, debouncedSearch, viewStatus]);
 
-  const selectedPlan = plans.find(p => p.id === selectedPlanId) || null;
-
-  const kpiActive = plans.length;
-  const kpiPendingAudit = plans.filter(p => p.status === 'PENDING_AUDIT').length;
-  const kpiCompleted = plans.filter(p => p.status === 'COMPLETED').length;
-  const kpiTotalCost = plans.reduce((acc, curr) => acc + (curr.total_cost || 0), 0);
+  const selectedPlan = data?.items.find(p => p.id === selectedPlanId) || null;
 
   const handleAction = async (plan: RecoveryPlan) => {
     if (plan.status === 'PENDING_AUDIT') {
@@ -103,6 +124,7 @@ export default function RecoveryPlansWorkspace() {
     } else if (plan.status === 'APPROVED') {
       try {
         await updateRecoveryPlanStatus(plan.id, 'COMPLETED');
+        await loadData(page, debouncedSearch, viewStatus); // Refresh data
         router.push(`/sap-actions?sim=${plan.disruption_id}`);
       } catch (err) {
         const e = err as Error;
@@ -128,11 +150,11 @@ export default function RecoveryPlansWorkspace() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans pb-20">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-6">
+    <div className="h-[calc(100vh-theme(spacing.24))] flex flex-col font-sans">
+      <div className="flex-1 flex flex-col min-h-0 space-y-6">
         
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
+        <div className="shrink-0 flex flex-col md:flex-row md:justify-between md:items-end gap-4">
           <div>
             <div className="flex items-center space-x-2 text-[13px] text-slate-500 mb-2 font-medium">
               <Link href="/command-center" className="hover:text-slate-900 transition-colors">Command Center</Link>
@@ -142,10 +164,16 @@ export default function RecoveryPlansWorkspace() {
             <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Recovery Operations</h1>
             <p className="text-[13px] text-slate-500 mt-1">Manage, audit, and execute active recovery plans across the enterprise.</p>
           </div>
+          
+          <div className="flex items-center space-x-3">
+            <button onClick={() => loadData(page, debouncedSearch, viewStatus)} disabled={loading} className="flex items-center px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[13px] font-medium transition-colors shadow-sm disabled:opacity-50">
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
+            </button>
+          </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center shadow-sm">
+          <div className="shrink-0 bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg flex items-center shadow-sm">
             <AlertCircle className="w-5 h-5 mr-3 shrink-0" />
             <div>
               <p className="text-sm font-medium">Unable to load operations data</p>
@@ -154,16 +182,16 @@ export default function RecoveryPlansWorkspace() {
           </div>
         )}
 
-        {loading ? (
-          <div className="space-y-6">
-            <div className="h-20 bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse" />
+        {!data && loading ? (
+          <div className="flex-1 space-y-6">
+            <div className="shrink-0 h-20 bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse" />
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
               <div className="xl:col-span-2 h-[400px] bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse" />
               <div className="xl:col-span-1 h-[400px] bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse" />
             </div>
           </div>
-        ) : plans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm py-32 text-center">
+        ) : data?.total === 0 && !searchQuery && viewStatus === 'ALL' ? (
+          <div className="flex-1 flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm py-32 text-center">
             <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center mb-4">
               <Inbox className="w-6 h-6 text-slate-400" />
             </div>
@@ -171,17 +199,17 @@ export default function RecoveryPlansWorkspace() {
             <p className="text-[13px] text-slate-500 mt-1.5 max-w-sm mx-auto">There are currently no persisted recovery plans in the system.</p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="flex-1 flex flex-col min-h-0 space-y-6">
             
             {/* UNIFIED COMMAND STRIP */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+            <div className="shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
               <div className="flex-1 p-5 flex items-center">
                 <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mr-4 shrink-0">
                   <Box className="w-4 h-4 text-slate-600" />
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Active Plans</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{kpiActive}</div>
+                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_active || 0}</div>
                 </div>
               </div>
               <div className="flex-1 p-5 flex items-center">
@@ -190,7 +218,7 @@ export default function RecoveryPlansWorkspace() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Pending Audit</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{kpiPendingAudit}</div>
+                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_pending_audit || 0}</div>
                 </div>
               </div>
               <div className="flex-1 p-5 flex items-center">
@@ -199,7 +227,7 @@ export default function RecoveryPlansWorkspace() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Completed</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{kpiCompleted}</div>
+                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_completed || 0}</div>
                 </div>
               </div>
               <div className="flex-1 p-5 flex items-center">
@@ -207,19 +235,32 @@ export default function RecoveryPlansWorkspace() {
                   <TrendingDown className="w-4 h-4 text-indigo-600" />
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Exposure</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{formatCurrency(kpiTotalCost)}</div>
+                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Plan Cost</p>
+                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{formatCurrency(data?.aggregate_exposure || 0)}</div>
                 </div>
               </div>
             </div>
 
             {/* MAIN WORKSPACE */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+            <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
               
               {/* LEFT: DATA GRID */}
-              <div className="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col">
-                <div className="px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-t-xl">
-                  <div className="relative flex-1 max-w-md w-full">
+              <div className="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-full min-h-0">
+                <div className="shrink-0 px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-t-xl">
+                  <div className="flex items-center space-x-2">
+                    <select 
+                      value={viewStatus}
+                      onChange={(e) => setViewStatus(e.target.value)}
+                      className="text-[13px] bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    >
+                      <option value="ALL">All Plans</option>
+                      <option value="PENDING_AUDIT">Pending Audit</option>
+                      <option value="PENDING_APPROVAL">Pending Approval</option>
+                      <option value="APPROVED">Approved</option>
+                      <option value="COMPLETED">Completed</option>
+                    </select>
+                  </div>
+                  <div className="relative flex-1 sm:w-64">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 
                       type="text" 
@@ -229,15 +270,12 @@ export default function RecoveryPlansWorkspace() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <button className="flex items-center px-3 py-2 text-[13px] font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200 rounded-lg transition-colors">
-                    <Filter className="w-3.5 h-3.5 mr-2" /> Filter
-                  </button>
                 </div>
 
-                <div className="overflow-x-auto overflow-y-auto max-h-[600px]">
-                  {filteredPlans.length > 0 ? (
+                <div className="flex-1 overflow-auto min-h-0 relative">
+                  {data?.items && data.items.length > 0 ? (
                     <table className="w-full text-left whitespace-nowrap">
-                      <thead className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm">
+                      <thead className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-sm shadow-[0_1px_2px_rgba(0,0,0,0.02)]">
                         <tr>
                           <th className="px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Plan ID</th>
                           <th className="px-5 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider border-b border-slate-200">Disruption</th>
@@ -248,7 +286,7 @@ export default function RecoveryPlansWorkspace() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {filteredPlans.map((plan) => {
+                        {data.items.map((plan) => {
                           const isSelected = plan.id === selectedPlanId;
                           const { date, time } = formatDate(plan.created_at);
                           const isRecommended = plan.final_score > 0;
@@ -296,21 +334,51 @@ export default function RecoveryPlansWorkspace() {
                       </tbody>
                     </table>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="flex flex-col items-center justify-center py-16 text-center h-full">
                       <Search className="w-6 h-6 text-slate-300 mb-3" />
-                      <p className="text-[13px] text-slate-500">No plans match your current search.</p>
+                      <p className="text-[13px] text-slate-500">No plans match your current criteria.</p>
+                    </div>
+                  )}
+                  {loading && (
+                    <div className="absolute inset-0 bg-white/50 backdrop-blur-[1px] flex items-center justify-center z-20">
+                      <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
                     </div>
                   )}
                 </div>
+
+                {/* PAGINATION FOOTER */}
+                {data && data.total > 0 && (
+                  <div className="shrink-0 px-5 py-3 border-t border-slate-100 bg-slate-50 rounded-b-xl flex items-center justify-between">
+                    <div className="text-[13px] text-slate-500">
+                      Showing <span className="font-medium text-slate-900">{(page - 1) * PAGE_SIZE + 1}</span> to <span className="font-medium text-slate-900">{Math.min(page * PAGE_SIZE, data.total)}</span> of <span className="font-medium text-slate-900">{data.total}</span> plans
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1 || loading}
+                        className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => setPage(p => p + 1)}
+                        disabled={!data.has_more || loading}
+                        className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* RIGHT: INTELLIGENCE PANEL */}
-              <div className="xl:col-span-1">
+              <div className="xl:col-span-1 h-full min-h-0 flex flex-col">
                 {selectedPlan ? (
-                  <div className="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-fit sticky top-6 overflow-hidden">
+                  <div className="bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-full min-h-0 overflow-hidden">
                     
                     {/* Header */}
-                    <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                    <div className="shrink-0 px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded bg-white border border-slate-200 flex items-center justify-center mr-3 shadow-sm">
                           <Crosshair className="w-4 h-4 text-slate-600" />
@@ -325,7 +393,7 @@ export default function RecoveryPlansWorkspace() {
                       </div>
                     </div>
                     
-                    <div className="p-5 flex-1 space-y-6">
+                    <div className="p-5 flex-1 overflow-y-auto space-y-6">
                       
                       {/* Strategy Block */}
                       <div>
@@ -393,7 +461,7 @@ export default function RecoveryPlansWorkspace() {
                     </div>
                     
                     {/* Contextual Action */}
-                    <div className="p-4 bg-slate-50 border-t border-slate-100">
+                    <div className="shrink-0 p-4 bg-slate-50 border-t border-slate-100">
                       <button 
                         onClick={() => handleAction(selectedPlan)}
                         className="w-full flex justify-center items-center py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-md font-medium text-[13px] shadow-sm transition-colors"
@@ -407,7 +475,7 @@ export default function RecoveryPlansWorkspace() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-50/50 border border-slate-200 border-dashed rounded-xl flex flex-col items-center justify-center min-h-[300px] h-fit text-center p-8 sticky top-6">
+                  <div className="bg-slate-50/50 border border-slate-200 border-dashed rounded-xl flex flex-col items-center justify-center h-full text-center p-8">
                     <div className="w-12 h-12 bg-white border border-slate-200 rounded-lg flex items-center justify-center mb-4 shadow-sm">
                       <ListChecks className="w-5 h-5 text-slate-400" />
                     </div>

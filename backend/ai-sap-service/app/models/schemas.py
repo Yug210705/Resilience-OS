@@ -70,6 +70,23 @@ class RecoveryPlanResponse(BaseModel):
 class UpdateStatusRequest(BaseModel):
     status: str
 
+class RecoveryPlanListResponse(BaseModel):
+    items: List[RecoveryPlanResponse]
+    total: int
+    limit: int
+    offset: int
+    has_more: bool
+    total_active: int
+    total_pending_audit: int
+    total_pending_approval: int
+    total_completed: int
+    # Sum of total_cost across all matching plans (recovery procurement cost)
+    aggregate_plan_cost: float
+    # Sum of total_sla_exposure across all matching plans (SLA penalty risk)
+    aggregate_sla_exposure: float
+    # Kept for backward compat during transition, equals aggregate_plan_cost
+    aggregate_exposure: float
+
 class ScenarioResponse(BaseModel):
     id: str
     name: str

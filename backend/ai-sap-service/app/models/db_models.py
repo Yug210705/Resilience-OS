@@ -8,6 +8,7 @@ class RecoveryPlanRecord(Base):
     
     id = Column(String, primary_key=True, default=lambda: f"RP-{str(uuid.uuid4())[:8].upper()}")
     disruption_id = Column(String, nullable=False, index=True)
+    scenario_id = Column(String, nullable=True, index=True)
     strategy = Column(String, nullable=False) # e.g., "Activate SUP-004"
     supplier_id = Column(String, nullable=False)
     
@@ -20,12 +21,12 @@ class RecoveryPlanRecord(Base):
     orders_recovered_pct = Column(Float, nullable=True) # Derivable or stored
     
     # State machine: PENDING_AUDIT -> PENDING_APPROVAL -> APPROVED -> ACTIVE -> COMPLETED
-    status = Column(String, default="PENDING_AUDIT", nullable=False)
+    status = Column(String, default="PENDING_AUDIT", nullable=False, index=True)
     
     # Store complete recovery plan payload context for details
     details = Column(JSON, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
 
 class ScenarioRecord(Base):
     __tablename__ = 'scenarios'
@@ -42,9 +43,9 @@ class ScenarioRecord(Base):
     total_sla_exposure = Column(Float, nullable=False)
     final_score = Column(Float, nullable=False)
     
-    status = Column(String, default="READY", nullable=False)
+    status = Column(String, default="READY", nullable=False, index=True)
     
     details = Column(JSON, nullable=True)
     
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
