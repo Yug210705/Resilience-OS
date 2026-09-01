@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { AlertTriangle, Zap, BarChart2, Target, Bot, CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
+import { CountUp } from '@/components/ui/count-up';
+
 export default function LiveDemoPage({ params }: { params: { id: string } }) {
   const { activeDisruption } = useSimulationStore();
   const router = useRouter();
@@ -36,9 +38,9 @@ export default function LiveDemoPage({ params }: { params: { id: string } }) {
   // Fallbacks if no options exist in DB for the selected node
   if (plans.length === 0) {
     plans.push(
-      { id: 'PLAN-1', name: 'Split Sourcing', supplier: 'SUP-011', time: 3, costIncrease: '14', recommended: true },
-      { id: 'PLAN-2', name: 'Alternate Sourcing', supplier: 'SUP-012', time: 8, costIncrease: '21', recommended: false },
-      { id: 'PLAN-3', name: 'Inventory Prioritization', supplier: 'INTERNAL', time: 5, costIncrease: '9', recommended: false }
+      { id: 'PLAN A', name: 'Alternate Sourcing', supplier: 'SUP-012', time: 8, costIncrease: '21', recommended: false },
+      { id: 'PLAN B', name: 'Split Sourcing', supplier: 'SUP-011', time: 3, costIncrease: '14', recommended: true },
+      { id: 'PLAN C', name: 'Inventory Prioritization', supplier: 'INTERNAL', time: 5, costIncrease: '9', recommended: false }
     );
   }
 
@@ -53,14 +55,14 @@ export default function LiveDemoPage({ params }: { params: { id: string } }) {
         <p className="text-lg text-slate-500 mb-8">Live prototype demonstration — from disruption to recovery decision</p>
         
         {/* STEP TRACKER */}
-        <div className="inline-flex items-center space-x-3 bg-slate-50 border border-slate-200 rounded-full px-6 py-3 text-sm font-bold text-slate-600 shadow-sm">
+        <div className="inline-flex items-center space-x-3 bg-slate-50 border border-slate-200 rounded-full px-6 py-3 text-sm font-bold text-slate-600 shadow-sm animate-in fade-in slide-in-from-top-4 duration-1000">
           <span className="flex items-center text-red-600"><AlertTriangle className="w-4 h-4 mr-1.5" /> BREAK</span>
           <ArrowRight className="w-4 h-4 text-slate-300" />
           <span className="flex items-center text-amber-500"><Zap className="w-4 h-4 mr-1.5" /> CASCADE</span>
           <ArrowRight className="w-4 h-4 text-slate-300" />
           <span className="flex items-center text-blue-500"><BarChart2 className="w-4 h-4 mr-1.5" /> COMPARE</span>
           <ArrowRight className="w-4 h-4 text-slate-300" />
-          <span className="flex items-center text-red-500"><Target className="w-4 h-4 mr-1.5" /> OPTIMIZE</span>
+          <span className="flex items-center text-emerald-600"><Target className="w-4 h-4 mr-1.5" /> OPTIMIZE</span>
           <ArrowRight className="w-4 h-4 text-slate-300" />
           <span className="flex items-center text-amber-600"><Bot className="w-4 h-4 mr-1.5" /> EXPLAIN</span>
           <ArrowRight className="w-4 h-4 text-slate-300" />
@@ -74,36 +76,36 @@ export default function LiveDemoPage({ params }: { params: { id: string } }) {
         {/* COLUMN 1: SCENARIO & KPIs */}
         <div className="space-y-6">
           {/* Simulated Scenario Card (Red Border) */}
-          <div className="bg-white border-2 border-red-200 rounded-xl p-6 shadow-sm relative overflow-hidden">
+          <div className="bg-white border-2 border-red-200 rounded-xl p-6 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-left-8 duration-700 delay-100">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-red-500"></div>
             <div className="flex items-center text-red-600 font-bold text-sm mb-3">
-              <AlertTriangle className="w-4 h-4 mr-2" /> Simulated Scenario
+              <AlertTriangle className="w-4 h-4 mr-2 animate-pulse" /> Simulated Scenario
             </div>
-            <h3 className="text-2xl font-extrabold text-slate-900 mb-1">{disruption.disruption_type.toUpperCase()} {disruption.affected_entity_id} UNAVAILABLE</h3>
+            <h3 className="text-2xl font-extrabold text-slate-900 mb-1">Supplier {disruption.affected_entity_id} Unavailable</h3>
             <p className="text-red-600 font-semibold mb-6">Disruption duration: {disruption.duration_days} Days</p>
             <p className="text-sm text-slate-500 italic">Live inject triggers downstream cascade simulation</p>
           </div>
 
           {/* Resilience OS Identifies Card (Yellow Border) */}
-          <div className="bg-white border-2 border-amber-200 rounded-xl p-6 shadow-sm relative overflow-hidden">
+          <div className="bg-white border-2 border-amber-200 rounded-xl p-6 shadow-sm relative overflow-hidden animate-in fade-in slide-in-from-left-8 duration-700 delay-300">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-amber-500"></div>
             <h4 className="font-bold text-slate-700 text-sm mb-6">Resilience OS Identifies</h4>
             
             <div className="space-y-5">
               <div>
-                <div className="text-3xl font-extrabold text-slate-900">{summary.affected_suppliers}</div>
+                <div className="text-3xl font-extrabold text-slate-900"><CountUp end={summary.affected_suppliers} duration={2000}/></div>
                 <div className="text-sm text-slate-500 font-medium">Suppliers Affected</div>
               </div>
               <div>
-                <div className="text-3xl font-extrabold text-slate-900">{summary.affected_orders}</div>
+                <div className="text-3xl font-extrabold text-slate-900"><CountUp end={summary.affected_orders} duration={2500}/></div>
                 <div className="text-sm text-slate-500 font-medium">Orders Impacted</div>
               </div>
               <div>
-                <div className="text-3xl font-extrabold text-amber-500">{summary.affected_plants}</div>
+                <div className="text-3xl font-extrabold text-amber-500"><CountUp end={summary.affected_plants} duration={3000}/></div>
                 <div className="text-sm text-slate-500 font-medium">Plants At Risk</div>
               </div>
               <div>
-                <div className="text-3xl font-extrabold text-red-600">{formatCurrency(summary.revenue_at_risk)}</div>
+                <div className="text-3xl font-extrabold text-red-600"><CountUp end={summary.revenue_at_risk} isCurrency={true} duration={3500}/></div>
                 <div className="text-sm text-red-600 font-semibold">Revenue Exposed</div>
               </div>
             </div>
