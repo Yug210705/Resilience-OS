@@ -134,3 +134,84 @@ export async function updateRecoveryPlanStatus(planId: string, status: string) {
   if (!res.ok) throw new Error("Failed to update status");
   return res.json();
 }
+
+export interface Scenario {
+  id: string;
+  name: string;
+  disruption_id: string;
+  strategy: string;
+  supplier_id: string;
+  total_cost: number;
+  max_delay_days: number;
+  blended_risk: number;
+  total_sla_exposure: number;
+  final_score: number;
+  status: 'SIMULATING' | 'READY' | 'SELECTED' | 'ARCHIVED';
+  created_at: string;
+  updated_at: string;
+  details?: Record<string, any>;
+}
+
+export interface ScenarioListResponse {
+  items: Scenario[];
+  total: number;
+  limit: number;
+  offset: number;
+  has_more: boolean;
+  total_active: number;
+  total_simulating: number;
+  total_ready: number;
+  total_selected: number;
+  aggregate_sla_exposure: number;
+}
+
+export interface FetchScenariosParams {
+  limit?: number;
+  offset?: number;
+  status?: string;
+  search?: string;
+  disruption_id?: string;
+}
+
+export async function fetchScenarios(params: FetchScenariosParams = {}): Promise<ScenarioListResponse> {
+  const qp = new URLSearchParams();
+  if (params.limit !== undefined) qp.set('limit', String(params.limit));
+  if (params.offset !== undefined) qp.set('offset', String(params.offset));
+  if (params.status) qp.set('status', params.status);
+  if (params.search) qp.set('search', params.search);
+  if (params.disruption_id) qp.set('disruption_id', params.disruption_id);
+  const qs = qp.toString();
+  const res = await fetch(`${AI_API_URL}/api/scenarios${qs ? `?${qs}` : ''}`);
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(detail.detail || 'Failed to fetch scenarios');
+  }
+  return res.json();
+}
+
+export async function generateScenarios(disruptionId: string, materialId: string, force = false): Promise<Scenario[]> {
+  const url = force
+    ? `${AI_API_URL}/api/scenarios/generate?force=true`
+    : `${AI_API_URL}/api/scenarios/generate`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ disruption_id: disruptionId, material_id: materialId }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ detail: 'Unknown error' }));
+    throw new Error(detail.detail || 'Failed to generate scenarios');
+  }
+  return res.json();
+}
+
+export async function updateScenarioStatus(scenarioId: string, status: string): Promise<Scenario> {
+  const res = await fetch(`${AI_API_URL}/api/scenarios/${scenarioId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) throw new Error('Failed to update scenario status');
+  return res.json();
+}
+

@@ -26,3 +26,25 @@ class RecoveryPlanRecord(Base):
     details = Column(JSON, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+class ScenarioRecord(Base):
+    __tablename__ = 'scenarios'
+    
+    id = Column(String, primary_key=True, default=lambda: f"SCN-{str(uuid.uuid4())[:8].upper()}")
+    name = Column(String, nullable=False)
+    disruption_id = Column(String, nullable=False, index=True)
+    strategy = Column(String, nullable=False)
+    supplier_id = Column(String, nullable=False)
+    
+    total_cost = Column(Float, nullable=False)
+    max_delay_days = Column(Float, nullable=False)
+    blended_risk = Column(Float, nullable=False)
+    total_sla_exposure = Column(Float, nullable=False)
+    final_score = Column(Float, nullable=False)
+    
+    status = Column(String, default="READY", nullable=False)
+    
+    details = Column(JSON, nullable=True)
+    
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

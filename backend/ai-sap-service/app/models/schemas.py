@@ -68,3 +68,44 @@ class RecoveryPlanResponse(BaseModel):
 
 class UpdateStatusRequest(BaseModel):
     status: str
+
+class ScenarioResponse(BaseModel):
+    id: str
+    name: str
+    disruption_id: str
+    strategy: str
+    supplier_id: str
+    total_cost: float
+    max_delay_days: float
+    blended_risk: float
+    total_sla_exposure: float
+    final_score: float
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    details: Optional[Dict[str, Any]] = None
+
+    class Config:
+        from_attributes = True
+
+class ScenarioListResponse(BaseModel):
+    """Paginated scenario list with server-side aggregate KPIs."""
+    items: List[ScenarioResponse]
+    # Pagination metadata
+    total: int           # total matching records (after status/search filter)
+    limit: int
+    offset: int
+    has_more: bool
+    # Server-computed aggregate KPIs (over ALL matching records, not just current page)
+    total_active: int    # READY + SIMULATING
+    total_simulating: int
+    total_ready: int
+    total_selected: int
+    aggregate_sla_exposure: float  # sum of sla_exposure for READY+SIMULATING records
+
+class GenerateScenariosRequest(BaseModel):
+    disruption_id: str
+    material_id: str
+
+class UpdateScenarioStatusRequest(BaseModel):
+    status: str

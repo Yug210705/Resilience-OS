@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Response, Depends
 from sqlalchemy.orm import Session
 import json
 import os
-from typing import List
+from typing import List, Optional
 
 from app.database import engine, Base, get_db
 from app.models.db_models import RecoveryPlanRecord
@@ -167,3 +167,210 @@ async def get_recovery_audit(run_id: str):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
+from app.models.db_models import ScenarioRecord
+from app.models.schemas import ScenarioResponse, ScenarioListResponse, GenerateScenariosRequest, UpdateScenarioStatusRequest
+
+@app.post("/api/scenarios/generate", response_model=List[ScenarioResponse], summary="Generate Scenarios from Disruption")
+async def api_generate_scenarios(req: GenerateScenariosRequest, force: bool = False, db: Session = Depends(get_db)):
+    try:
+        # IDEMPOTENCY GUARD: Check for existing active (READY/SIMULATING) scenarios for this disruption.
+        # If they exist and force=False, return them rather than creating a duplicate batch.
+        existing_active = db.query(ScenarioRecord).filter(
+            ScenarioRecord.disruption_id == req.disruption_id,
+            ScenarioRecord.status.in_(["READY", "SIMULATING"])
+        ).all()
+
+        if existing_active and not force:
+            # Return the existing active batch — no new records created.
+            return [
+                ScenarioResponse(
+                    id=s.id, name=s.name, disruption_id=s.disruption_id,
+                    strategy=s.strategy, supplier_id=s.supplier_id,
+                    total_cost=s.total_cost, max_delay_days=s.max_delay_days,
+                    blended_risk=s.blended_risk, total_sla_exposure=s.total_sla_exposure,
+                    final_score=s.final_score, status=s.status,
+                    created_at=s.created_at, updated_at=s.updated_at, details=s.details
+                ) for s in existing_active
+            ]
+
+        # If force=True, archive the previous active batch before generating a new one.
+        if existing_active and force:
+            for s in existing_active:
+                if s.status in ("READY", "SIMULATING"):
+                    s.status = "ARCHIVED"
+            db.commit()
+
+        # Generate fresh scenarios from the recovery engine.
+        options_res = await get_recovery_plans(req.material_id)
+        new_scenarios = []
+        
+        for i, option in enumerate(options_res.ranked_plans):
+            suppliers_used = option.get("suppliers_used", [])
+            supplier_id_str = ",".join(suppliers_used) if suppliers_used else "Unknown"
+            
+            if len(suppliers_used) > 1:
+                name = f"Dual-Source Activation (V{i+1})"
+                strategy = f"Activate {supplier_id_str}"
+            elif option.get("max_delay_days", 0) > 7:
+                name = f"Inventory Reallocation (V{i+1})"
+                strategy = f"Reallocate to {supplier_id_str}"
+            else:
+                name = f"Alternate Supplier Shift (V{i+1})"
+                strategy = f"Activate {supplier_id_str}"
+                
+            record = ScenarioRecord(
+                name=name,
+                disruption_id=req.disruption_id,
+                strategy=strategy,
+                supplier_id=supplier_id_str,
+                total_cost=option.get("total_cost", 0),
+                max_delay_days=option.get("max_delay_days", 0),
+                blended_risk=option.get("blended_risk", 0),
+                total_sla_exposure=option.get("total_sla_exposure", 0),
+                final_score=option.get("final_score", 0),
+                status="READY",
+                details=option
+            )
+            db.add(record)
+            new_scenarios.append(record)
+            
+        db.commit()
+        for s in new_scenarios:
+            db.refresh(s)
+            
+        return [
+            ScenarioResponse(
+                id=s.id, name=s.name, disruption_id=s.disruption_id,
+                strategy=s.strategy, supplier_id=s.supplier_id,
+                total_cost=s.total_cost, max_delay_days=s.max_delay_days,
+                blended_risk=s.blended_risk, total_sla_exposure=s.total_sla_exposure,
+                final_score=s.final_score, status=s.status,
+                created_at=s.created_at, updated_at=s.updated_at, details=s.details
+            ) for s in new_scenarios
+        ]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/scenarios", response_model=ScenarioListResponse, summary="List Scenarios (paginated)")
+async def api_list_scenarios(
+    limit: int = 50,
+    offset: int = 0,
+    status: Optional[str] = None,         # e.g. "READY" or "READY,SIMULATING"
+    search: Optional[str] = None,          # searches id, name, strategy, disruption_id
+    disruption_id: Optional[str] = None,
+    db: Session = Depends(get_db)
+):
+    from sqlalchemy import func, or_
+
+    # --- Build filtered base query (for count + current page) ---
+    base_q = db.query(ScenarioRecord)
+
+    if disruption_id:
+        base_q = base_q.filter(ScenarioRecord.disruption_id == disruption_id)
+
+    if status:
+        status_list = [s.strip() for s in status.split(",") if s.strip()]
+        base_q = base_q.filter(ScenarioRecord.status.in_(status_list))
+
+    if search:
+        term = f"%{search.lower()}%"
+        base_q = base_q.filter(
+            or_(
+                func.lower(ScenarioRecord.id).like(term),
+                func.lower(ScenarioRecord.name).like(term),
+                func.lower(ScenarioRecord.strategy).like(term),
+                func.lower(ScenarioRecord.disruption_id).like(term),
+            )
+        )
+
+    total = base_q.count()
+
+    page_rows = base_q.order_by(ScenarioRecord.created_at.desc()).offset(offset).limit(limit).all()
+
+    # --- Server-side aggregate KPIs (over ALL records, unfiltered by page) ---
+    all_q = db.query(ScenarioRecord)
+    total_ready = all_q.filter(ScenarioRecord.status == "READY").count()
+    total_simulating = all_q.filter(ScenarioRecord.status == "SIMULATING").count()
+    total_selected = all_q.filter(ScenarioRecord.status == "SELECTED").count()
+    total_active = total_ready + total_simulating
+
+    # Aggregate SLA exposure for active scenarios via DB
+    active_exposure_result = db.query(func.sum(ScenarioRecord.total_sla_exposure)).filter(
+        ScenarioRecord.status.in_(["READY", "SIMULATING"])
+    ).scalar()
+    aggregate_sla_exposure = float(active_exposure_result or 0.0)
+
+    items = [
+        ScenarioResponse(
+            id=s.id, name=s.name, disruption_id=s.disruption_id,
+            strategy=s.strategy, supplier_id=s.supplier_id,
+            total_cost=s.total_cost, max_delay_days=s.max_delay_days,
+            blended_risk=s.blended_risk, total_sla_exposure=s.total_sla_exposure,
+            final_score=s.final_score, status=s.status,
+            created_at=s.created_at, updated_at=s.updated_at, details=s.details
+        ) for s in page_rows
+    ]
+
+    return ScenarioListResponse(
+        items=items,
+        total=total,
+        limit=limit,
+        offset=offset,
+        has_more=(offset + limit) < total,
+        total_active=total_active,
+        total_simulating=total_simulating,
+        total_ready=total_ready,
+        total_selected=total_selected,
+        aggregate_sla_exposure=aggregate_sla_exposure,
+    )
+
+
+@app.get("/api/scenarios/{scenario_id}", response_model=ScenarioResponse, summary="Get Scenario")
+async def api_get_scenario(scenario_id: str, db: Session = Depends(get_db)):
+    s = db.query(ScenarioRecord).filter(ScenarioRecord.id == scenario_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    return ScenarioResponse(
+        id=s.id,
+        name=s.name,
+        disruption_id=s.disruption_id,
+        strategy=s.strategy,
+        supplier_id=s.supplier_id,
+        total_cost=s.total_cost,
+        max_delay_days=s.max_delay_days,
+        blended_risk=s.blended_risk,
+        total_sla_exposure=s.total_sla_exposure,
+        final_score=s.final_score,
+        status=s.status,
+        created_at=s.created_at,
+        updated_at=s.updated_at,
+        details=s.details
+    )
+
+@app.put("/api/scenarios/{scenario_id}/status", response_model=ScenarioResponse)
+async def api_update_scenario_status(scenario_id: str, req: UpdateScenarioStatusRequest, db: Session = Depends(get_db)):
+    s = db.query(ScenarioRecord).filter(ScenarioRecord.id == scenario_id).first()
+    if not s:
+        raise HTTPException(status_code=404, detail="Scenario not found")
+    
+    s.status = req.status
+    db.commit()
+    db.refresh(s)
+    
+    return ScenarioResponse(
+        id=s.id,
+        name=s.name,
+        disruption_id=s.disruption_id,
+        strategy=s.strategy,
+        supplier_id=s.supplier_id,
+        total_cost=s.total_cost,
+        max_delay_days=s.max_delay_days,
+        blended_risk=s.blended_risk,
+        total_sla_exposure=s.total_sla_exposure,
+        final_score=s.final_score,
+        status=s.status,
+        created_at=s.created_at,
+        updated_at=s.updated_at,
+        details=s.details
+    )
