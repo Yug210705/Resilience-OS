@@ -15,7 +15,7 @@ from typing import Dict, Any, List
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
-from app.adapters.sap_adapter import MockSAPAdapter, RealSAPAdapter
+from app.adapters.sap_adapter import BTPDestinationAdapter
 from app.services.recovery_engine.models import ShortageData, RecoveryPlan
 from app.services.recovery_engine.engine import generate_plans, score_plans
 from app.core.guardrails import validate_numbers
@@ -30,7 +30,8 @@ MODEL_NAME = "google/gemma-4-31b-it:free"
 
 # SAP Cache for resilience
 sap_cache: Dict[str, dict] = {}
-sap_adapter = RealSAPAdapter()
+from app.adapters.sap_adapter import CAPAdapter
+sap_adapter = CAPAdapter()
 
 class AuditLog(BaseModel):
     run_id: str

@@ -3,6 +3,7 @@ import { Bell, Search, HelpCircle, ChevronDown, Moon, Sun, CheckCircle2, AlertTr
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useSimulationStore } from '@/stores/useSimulationStore';
+import { SapStatusIndicator } from '@/components/ui/sap-status-indicator';
 
 export function Topbar() {
   const { theme, setTheme } = useTheme();
@@ -62,6 +63,7 @@ export function Topbar() {
       </div>
       
       <div className="flex items-center space-x-5 text-sm">
+        <SapStatusIndicator />
         {/* Status */}
         {activeDisruption ? (
           <div className="flex items-center text-red-600 dark:text-red-500 font-semibold text-xs tracking-wide">
