@@ -270,7 +270,6 @@ export function SupplyChainGraph() {
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2} 
         maxZoom={1.5}
-        proOptions={{ hideAttribution: true }}
       >
         <Background color={isDark ? '#334155' : '#e2e8f0'} gap={16} />
         <Controls position="top-left" className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-lg shadow-sm !mt-12 !ml-4" />

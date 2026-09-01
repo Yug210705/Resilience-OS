@@ -1,47 +1,89 @@
 'use client';
-import { useSimulationStore } from '@/stores/useSimulationStore';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState, use, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Check, X, FileCode2, ArrowRight } from 'lucide-react';
+import { Check, X, FileCode2, ArrowRight, AlertCircle } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
+import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus } from '@/services/api';
 
 function PageContent({ id }: { id: string }) {
-  const { activeDisruption } = useSimulationStore();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const planId = searchParams.get('plan');
-  const supplierId = searchParams.get('supplier');
+  
+  const [plan, setPlan] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [updating, setUpdating] = useState(false);
   const [approved, setApproved] = useState(false);
 
   useEffect(() => {
-    if (!activeDisruption) router.push('/command-center');
-  }, [activeDisruption, router]);
+    fetchPersistedRecoveryPlans()
+      .then(plans => {
+        const p = plans.find((x: any) => x.id === id);
+        if (p) {
+          setPlan(p);
+        } else {
+          setError("Recovery Plan not found.");
+        }
+      })
+      .catch(err => setError(err.message));
+  }, [id]);
 
-  if (!activeDisruption) return null;
+  const handleApprove = async () => {
+    if (updating || approved) return;
+    setUpdating(true);
+    setError(null);
+    try {
+      await updateRecoveryPlanStatus(id, 'APPROVED');
+      setApproved(true);
+      setTimeout(() => {
+        router.push(`/recovery-plans`);
+      }, 1000);
+    } catch (err: any) {
+      setError(err.message);
+      setUpdating(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (updating || approved) return;
+    setUpdating(true);
+    setError(null);
+    try {
+      await updateRecoveryPlanStatus(id, 'REJECTED');
+      router.push(`/recovery-plans`);
+    } catch (err: any) {
+      setError(err.message);
+      setUpdating(false);
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="p-12 text-center text-red-600 bg-red-50 border border-red-200 rounded-xl mt-12 max-w-4xl mx-auto flex items-center justify-center">
+        <AlertCircle className="w-5 h-5 mr-3" />
+        {error}
+      </div>
+    );
+  }
+
+  if (!plan) return <div className="p-12 text-center text-slate-500">Loading plan...</div>;
 
   const sapPayload = {
     action: "CHANGE_SUPPLIER",
-    material_id: activeDisruption.recovery_context.material_shortages[0]?.material_id,
-    old_supplier: activeDisruption.disruption.affected_entity_id,
-    new_supplier: supplierId,
-    quantity: 2500,
+    material_id: plan.details?.material_id || "UNKNOWN",
+    plan_id: plan.id,
+    strategy: plan.strategy,
+    new_supplier: plan.supplier_id,
     timestamp: new Date().toISOString()
   };
 
-  const handleApprove = () => {
-    setApproved(true);
-    setTimeout(() => {
-      router.push(`/sap-actions?sim=${id}`);
-    }, 1500);
-  };
-
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12">
+    <div className="space-y-6 max-w-4xl mx-auto pb-12 py-8">
       <div className="flex justify-between items-end border-b border-slate-200 pb-4">
         <div>
-          <div className="flex items-center space-x-2 text-sm text-slate-500 mb-2">
-            <Link href="/command-center" className="hover:text-slate-900 transition-colors">Command Center</Link>
+          <div className="flex items-center space-x-2 text-sm text-slate-500 mb-2 font-medium">
+            <Link href="/recovery-plans" className="hover:text-slate-900 transition-colors">Recovery Plans</Link>
+            <span>/</span>
+            <span className="font-semibold text-slate-900">{id}</span>
             <span>/</span>
             <span className="font-semibold text-slate-900">Action Approval</span>
           </div>
@@ -57,15 +99,19 @@ function PageContent({ id }: { id: string }) {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-slate-500">Operation</span>
-                <span className="font-semibold text-slate-900">Activate Alternate Supplier</span>
+                <span className="font-semibold text-slate-900">{plan.strategy}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Entity</span>
-                <span className="font-semibold text-slate-900">{supplierId}</span>
+                <span className="text-slate-500">Target Supplier</span>
+                <span className="font-semibold text-slate-900">{plan.supplier_id}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Revenue Protected</span>
-                <span className="font-semibold text-emerald-600">{formatCurrency(activeDisruption.summary.revenue_at_risk * 0.84)}</span>
+                <span className="text-slate-500">Total Plan Cost</span>
+                <span className="font-semibold text-slate-900 font-mono">{formatCurrency(plan.total_cost)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Max Delay</span>
+                <span className="font-semibold text-slate-900">{plan.max_delay_days} days</span>
               </div>
               <div className="flex justify-between pt-3 border-t border-slate-100">
                 <span className="text-slate-500">Requested By</span>
@@ -76,20 +122,23 @@ function PageContent({ id }: { id: string }) {
           
           <div className="flex space-x-4">
             <button 
-              disabled={approved}
+              onClick={handleReject}
+              disabled={updating || approved}
               className="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold py-3 rounded-lg shadow-sm flex justify-center items-center disabled:opacity-50"
             >
               <X className="w-5 h-5 mr-2 text-red-500" /> Reject
             </button>
             <button 
               onClick={handleApprove}
-              disabled={approved}
+              disabled={updating || approved}
               className={`flex-1 font-semibold py-3 rounded-lg shadow-sm flex justify-center items-center transition-all ${approved ? 'bg-emerald-500 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
             >
               {approved ? (
                 <><Check className="w-5 h-5 mr-2" /> Approved</>
+              ) : updating ? (
+                'Approving...'
               ) : (
-                <><Check className="w-5 h-5 mr-2" /> Approve & Execute</>
+                <><Check className="w-5 h-5 mr-2" /> Approve Plan</>
               )}
             </button>
           </div>
@@ -109,6 +158,7 @@ function PageContent({ id }: { id: string }) {
   );
 }
 
+import { use } from 'react';
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);

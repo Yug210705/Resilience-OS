@@ -25,7 +25,7 @@ export function InventoryCoverageChart() {
             <div className="text-xs text-slate-500 dark:text-slate-400">Avg. remaining coverage</div>
           </div>
           
-          <div className="flex-1 min-h-[120px] w-full mt-2">
+          <div className="flex-1 h-[120px] w-full mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
