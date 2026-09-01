@@ -35,6 +35,15 @@ async def api_get_recovery_options(material_id: str = "MAT-12"):
 @app.post("/api/recovery/plans", response_model=RecoveryPlanResponse, summary="Create Recovery Plan")
 async def api_create_recovery_plan(req: CreateRecoveryPlanRequest, db: Session = Depends(get_db)):
     try:
+        # INVARIANT 5: Reject stale/archived/invalid scenario selection
+        if req.scenario_id:
+            scenario = db.query(ScenarioRecord).filter(ScenarioRecord.id == req.scenario_id).first()
+            if not scenario:
+                raise HTTPException(status_code=404, detail=f"Scenario {req.scenario_id} not found")
+            if scenario.status == "ARCHIVED":
+                raise HTTPException(status_code=422, detail="Cannot create Recovery Plan from an ARCHIVED scenario")
+            # If scenario strategy says "Activate SUP-A", ensure we carry over correctly.
+
         # Generate plans on the fly to find the matching one to persist
         options_res = await get_recovery_plans(req.material_id)
         
@@ -353,6 +362,14 @@ async def api_update_scenario_status(scenario_id: str, req: UpdateScenarioStatus
     s = db.query(ScenarioRecord).filter(ScenarioRecord.id == scenario_id).first()
     if not s:
         raise HTTPException(status_code=404, detail="Scenario not found")
+    
+    # Invariant: Only READY scenarios can be SELECTED
+    if req.status == "SELECTED" and s.status != "READY":
+        raise HTTPException(status_code=422, detail=f"Cannot transition scenario from {s.status} to SELECTED")
+        
+    # Invariant: ARCHIVED scenarios cannot be transitioned back to active states
+    if s.status == "ARCHIVED" and req.status in ["READY", "SIMULATING"]:
+        raise HTTPException(status_code=422, detail="Cannot reactivate an ARCHIVED scenario")
     
     s.status = req.status
     db.commit()

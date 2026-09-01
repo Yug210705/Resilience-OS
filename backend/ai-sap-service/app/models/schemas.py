@@ -50,6 +50,7 @@ class CreateRecoveryPlanRequest(BaseModel):
     disruption_id: str
     material_id: str
     option_id: str
+    scenario_id: Optional[str] = None
 
 class RecoveryPlanResponse(BaseModel):
     id: str

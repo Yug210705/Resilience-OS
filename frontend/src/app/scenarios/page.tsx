@@ -71,6 +71,9 @@ export default function ScenariosPage() {
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  
+  // View State (distinguish current generation from history)
+  const [viewMode, setViewMode] = useState<'ACTIVE' | 'ARCHIVED' | 'ALL'>('ACTIVE');
 
   // Debounce search
   useEffect(() => {
@@ -81,19 +84,24 @@ export default function ScenariosPage() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const loadData = useCallback(async (currentPage: number, currentSearch: string) => {
+  const loadData = useCallback(async (currentPage: number, currentSearch: string, currentView: string, forceResetSelection: boolean = false) => {
     setLoading(true);
     setError(null);
     try {
+      let statusFilter = undefined;
+      if (currentView === 'ACTIVE') statusFilter = 'READY,SIMULATING';
+      if (currentView === 'ARCHIVED') statusFilter = 'ARCHIVED';
+      
       const res = await fetchScenarios({
         limit: PAGE_SIZE,
         offset: (currentPage - 1) * PAGE_SIZE,
-        search: currentSearch || undefined
+        search: currentSearch || undefined,
+        status: statusFilter
       });
       setData(res);
       
-      // Auto-select first READY scenario if none selected
-      if (res.items.length > 0 && !selectedId) {
+      // Auto-select first READY scenario if none selected (or if forced reset)
+      if (res.items.length > 0 && (forceResetSelection || !selectedId)) {
         const firstReady = res.items.find(s => s.status === 'READY') || res.items[0];
         setSelectedId(firstReady.id);
       }
@@ -106,8 +114,8 @@ export default function ScenariosPage() {
   }, [selectedId]);
 
   useEffect(() => {
-    loadData(page, debouncedSearch);
-  }, [page, debouncedSearch, loadData]);
+    loadData(page, debouncedSearch, viewMode, false);
+  }, [page, debouncedSearch, viewMode]); // Note: removing loadData from deps to avoid infinite loops, as selectedId changes.
 
   // We need to know if there are any active scenarios for this disruption to decide button semantics
   // We can check if total_active > 0 (this is global, not just the page)
@@ -122,7 +130,9 @@ export default function ScenariosPage() {
       setPage(1);
       setSearchQuery('');
       setDebouncedSearch('');
-      await loadData(1, '');
+      setSelectedId(null);
+      setViewMode('ACTIVE'); // Ensure we see the new active ones
+      await loadData(1, '', 'ACTIVE', true); // Force selection reset on reload
     } catch (err) {
       const e = err as Error;
       setGenerateError(e.message || 'Failed to generate scenarios.');
@@ -139,7 +149,8 @@ export default function ScenariosPage() {
       await createRecoveryPlan(
         scenario.disruption_id,
         MATERIAL_ID,
-        scenario.details?.id || scenario.id
+        scenario.details?.id || scenario.id,
+        scenario.id
       );
       router.push('/recovery-plans');
     } catch (err) {
@@ -193,7 +204,7 @@ export default function ScenariosPage() {
               Generate Scenarios
             </button>
           )}
-          <button onClick={() => loadData(page, debouncedSearch)} disabled={loading} className="flex items-center px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[13px] font-medium transition-colors shadow-sm disabled:opacity-50">
+          <button onClick={() => loadData(page, debouncedSearch, viewMode, false)} disabled={loading} className="flex items-center px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[13px] font-medium transition-colors shadow-sm disabled:opacity-50">
             <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
         </div>
@@ -303,6 +314,15 @@ export default function ScenariosPage() {
               <div className="shrink-0 px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h3 className="font-semibold text-[15px] text-slate-900">All Scenarios</h3>
                 <div className="flex w-full sm:w-auto items-center space-x-2">
+                  <select 
+                    value={viewMode}
+                    onChange={(e) => setViewMode(e.target.value as any)}
+                    className="text-[13px] bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  >
+                    <option value="ACTIVE">Active (Ready/Simulating)</option>
+                    <option value="ARCHIVED">Historical (Archived)</option>
+                    <option value="ALL">All Scenarios</option>
+                  </select>
                   <div className="relative flex-1 sm:w-64">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input 

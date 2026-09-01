@@ -50,11 +50,11 @@ export async function fetchRecoveryOptions(materialId: string) {
 }
 
 // Create a persisted plan when clicking 'Audit Risk & Approve'
-export async function createRecoveryPlan(disruptionId: string, materialId: string, optionId: string) {
+export async function createRecoveryPlan(disruptionId: string, materialId: string, optionId: string, scenarioId?: string) {
   const res = await fetch(`${AI_API_URL}/api/recovery/plans`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ disruption_id: disruptionId, material_id: materialId, option_id: optionId }),
+    body: JSON.stringify({ disruption_id: disruptionId, material_id: materialId, option_id: optionId, scenario_id: scenarioId }),
   });
   if (!res.ok) {
     let errorDetail = "Unknown error";
