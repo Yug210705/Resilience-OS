@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Response
 import json
 import os
 
-from orchestrator import run_recovery_pipeline, AuditLog
+from app.services.orchestrator import run_recovery_pipeline, AuditLog
 
 app = FastAPI(
     title="RESILIENCE OS API",
