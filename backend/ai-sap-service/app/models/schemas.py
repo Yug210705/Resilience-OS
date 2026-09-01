@@ -1,5 +1,6 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
+from datetime import datetime
 
 class DisruptionInput(BaseModel):
     type: str
@@ -44,3 +45,26 @@ class CounterfactualInput(BaseModel):
     original_plan_id: str
     failed_supplier: str
     remaining_plans: List[RecoveryPlanInput]
+
+class CreateRecoveryPlanRequest(BaseModel):
+    disruption_id: str
+    material_id: str
+    option_id: str
+
+class RecoveryPlanResponse(BaseModel):
+    id: str
+    disruption_id: str
+    strategy: str
+    supplier_id: str
+    total_cost: float
+    max_delay_days: float
+    blended_risk: float
+    total_sla_exposure: float
+    final_score: float
+    orders_recovered_pct: Optional[float] = None
+    status: str
+    created_at: datetime
+    details: Optional[Dict[str, Any]] = None
+
+class UpdateStatusRequest(BaseModel):
+    status: str
