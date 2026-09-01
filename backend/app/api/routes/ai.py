@@ -7,13 +7,14 @@ from app.db.models import Scenario
 from app.engines.impact_engine import calculate_impact
 from app.engines.recovery_engine import generate_recovery_options
 from app.ai.adapter import AIAdapter
+from app.ai.provider import Member3AIProvider
 from app.ai.contracts import AIRequestPayload, DisruptionInfo, ImpactInfo, EvaluatedOption
 from app.ai.exceptions import AIIntegrationError, AIProviderUnavailableError
 
 router = APIRouter()
 
 # Note: In a production environment, the provider would be injected via FastAPI dependencies
-ai_adapter = AIAdapter()
+ai_adapter = AIAdapter(provider=Member3AIProvider())
 
 @router.post("/{scenario_id}/ai-recommendation")
 def get_ai_recommendation(scenario_id: str = Path(...), db: Session = Depends(get_db)):

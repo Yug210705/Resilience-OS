@@ -11,12 +11,11 @@ from app.engines.recovery_engine import generate_recovery_options
 from app.db.models import RecoveryPlan, AuditRecord, Scenario
 from backend.domain.enums import PlanStatus, ActionType
 
-# For SAP integration boundary
-from app.integrations.sap.adapter import PlaceholderSAPAdapter
+from app.integrations.sap.adapter import Member3SAPAdapter
 from app.integrations.sap.schemas import SAPRecoveryActionRequest
 
 router = APIRouter()
-sap_adapter = PlaceholderSAPAdapter()
+sap_adapter = Member3SAPAdapter()
 
 class CreateRecoveryPlanRequest(BaseModel):
     action_type: str

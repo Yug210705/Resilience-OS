@@ -1,12 +1,12 @@
 from fastapi import APIRouter
-from app.integrations.sap.adapter import PlaceholderSAPAdapter
+from app.integrations.sap.adapter import Member3SAPAdapter
 from app.core.config import settings
 
 router = APIRouter()
 
 # Instantiate the port. In production, this would be injected 
 # via FastAPI dependency injection based on configuration.
-sap_adapter = PlaceholderSAPAdapter()
+sap_adapter = Member3SAPAdapter()
 
 @router.get("/sap/status")
 def get_sap_integration_status():
