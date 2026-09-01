@@ -2,7 +2,7 @@ import asyncio
 import random
 from rich.console import Console
 
-import orchestrator
+from app.services from app.services import orchestrator
 
 console = Console()
 

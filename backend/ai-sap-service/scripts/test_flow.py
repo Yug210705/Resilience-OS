@@ -11,8 +11,8 @@ from rich.text import Text
 from rich import print as rprint
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-from schemas import DisruptionInput, ImpactInput, RecoveryPlanInput, CounterfactualInput
-import orchestrator
+from app.models.schemas import DisruptionInput, ImpactInput, RecoveryPlanInput, CounterfactualInput
+from app.services import orchestrator
 
 console = Console()
 

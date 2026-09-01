@@ -15,10 +15,10 @@ from typing import Dict, Any, List
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
-from sap_adapter import MockSAPAdapter, RealSAPAdapter
-from recovery_engine.models import ShortageData, RecoveryPlan
-from recovery_engine.engine import generate_plans, score_plans
-from guardrails import validate_numbers
+from app.adapters.sap_adapter import MockSAPAdapter, RealSAPAdapter
+from app.services.recovery_engine.models import ShortageData, RecoveryPlan
+from app.services.recovery_engine.engine import generate_plans, score_plans
+from app.core.guardrails import validate_numbers
 
 load_dotenv()
 logger = structlog.get_logger()
