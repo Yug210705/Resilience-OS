@@ -8,6 +8,11 @@ import { cn } from '@/lib/utils';
 import { ImpactOverviewTab } from '@/components/disruptions/tabs/impact-overview-tab';
 import { InventoryTab } from '@/components/disruptions/tabs/inventory-tab';
 import { ProductionTab } from '@/components/disruptions/tabs/production-tab';
+import { DependencyGraphTab } from '@/components/disruptions/tabs/dependency-graph-tab';
+import { AffectedEntitiesTab } from '@/components/disruptions/tabs/affected-entities-tab';
+import { OrdersTab } from '@/components/disruptions/tabs/orders-tab';
+import { FinancialImpactTab } from '@/components/disruptions/tabs/financial-impact-tab';
+import { ExplanationsTab } from '@/components/disruptions/tabs/explanations-tab';
 
 const TABS = [
   'Impact Overview', 'Dependency Graph', 'Affected Entities', 
@@ -142,21 +147,29 @@ export default function ImpactAnalysisPage() {
         <div className="px-6 py-6 pb-12">
           {/* Keeping tabs in the DOM so they don't remount and lose state/flicker when switching */}
           <div className={activeTab === 'Impact Overview' ? 'block' : 'hidden'}>
-            <ImpactOverviewTab disruptionData={data} />
+            <ImpactOverviewTab disruptionData={data} setActiveTab={setActiveTab} />
+          </div>
+          <div className={activeTab === 'Dependency Graph' ? 'block h-full' : 'hidden'}>
+            <DependencyGraphTab disruptionData={data} />
+          </div>
+          <div className={activeTab === 'Affected Entities' ? 'block' : 'hidden'}>
+            <AffectedEntitiesTab disruptionData={data} />
           </div>
           <div className={activeTab === 'Inventory' ? 'block' : 'hidden'}>
-            <InventoryTab disruptionData={data} />
+            <InventoryTab disruptionData={data} setActiveTab={setActiveTab} />
           </div>
           <div className={activeTab === 'Production' ? 'block' : 'hidden'}>
             <ProductionTab disruptionData={data} />
           </div>
-          
-          {/* Fallbacks for other tabs */}
-          {!['Impact Overview', 'Inventory', 'Production'].includes(activeTab) && (
-            <div className="h-full flex items-center justify-center text-slate-400 dark:text-slate-500 font-medium py-20">
-              {activeTab} view not implemented in this demo.
-            </div>
-          )}
+          <div className={activeTab === 'Orders' ? 'block' : 'hidden'}>
+            <OrdersTab disruptionData={data} />
+          </div>
+          <div className={activeTab === 'Financial Impact' ? 'block' : 'hidden'}>
+            <FinancialImpactTab disruptionData={data} />
+          </div>
+          <div className={activeTab === 'Explanations' ? 'block' : 'hidden'}>
+            <ExplanationsTab disruptionData={data} />
+          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPitchMode, setIsPitchMode] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
   const { setActiveDisruption } = useSimulationStore();
   const router = useRouter();
 
@@ -51,6 +52,7 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
 
   const runSimulation = async () => {
     setIsLoading(true);
+    setErrorMsg('');
     try {
       let result;
       if (isPitchMode) {
@@ -66,9 +68,9 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
       
       // Always route to the beautiful Disruption Impact Analysis page
       router.push(`/disruptions/${result.simulation_id}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to simulate. Ensure backend is running.");
+      setErrorMsg(e.message || "Failed to simulate. Ensure backend is running and entity ID is correct.");
     } finally {
       setIsLoading(false);
     }
@@ -139,6 +141,12 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                 </div>
               ) : (
                 <div className={`transition-opacity duration-300 ${isPitchMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                  {errorMsg && (
+                    <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-lg border border-red-100 flex items-center">
+                      <AlertTriangle className="w-4 h-4 mr-2 shrink-0" />
+                      {errorMsg}
+                    </div>
+                  )}
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-slate-700 mb-1">Disruption Type</label>
