@@ -66,7 +66,7 @@ export function RevenueExposureChart() {
                     stroke="none"
                   >
                     {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`revenue-cell-${index}-${entry.name.replace(/\s+/g, '-')}`} fill={entry.color} />
                     ))}
                   </Pie>
                 </PieChart>

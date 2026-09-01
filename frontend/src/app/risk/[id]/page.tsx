@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense, use } from 'react';
 import Link from 'next/link';
 import { ShieldAlert, CheckCircle2, AlertCircle, ArrowRight, Activity, Sparkles, ShieldCheck } from 'lucide-react';
-import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus, runRecoveryPipeline } from '@/services/api';
+import { fetchRecoveryPlan, updateRecoveryPlanStatus, runRecoveryPipeline } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 
@@ -20,14 +20,9 @@ function PageContent({ id }: { id: string }) {
   const { activeDisruption } = useSimulationStore();
 
   useEffect(() => {
-    fetchPersistedRecoveryPlans()
-      .then(plans => {
-        const p = plans.find((x: any) => x.id === id);
-        if (p) {
-          setPlan(p);
-        } else {
-          setError("Recovery Plan not found.");
-        }
+    fetchRecoveryPlan(id)
+      .then(p => {
+        setPlan(p);
       })
       .catch(err => setError(err.message));
   }, [id]);

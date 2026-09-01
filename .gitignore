@@ -1,14 +1,15 @@
 venv/
 .env
+.env.*
 __pycache__/
 logs/
 *.pyc
-
 # Database
 *.db
 
 # Node / Frontend
 node_modules/
+.next/
 dist/
 
 # IDE

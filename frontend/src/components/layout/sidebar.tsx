@@ -7,60 +7,78 @@ import {
   ChevronRight, Play
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const baseMenuGroups = [
   {
     title: 'COMMAND CENTER',
     items: [
-      { name: 'Overview', href: '/command-center', icon: LayoutDashboard },
-      { name: 'Disruptions', href: '/disruptions', icon: Activity },
-      { name: 'Supply Chain', href: '/supply-chain', icon: Network },
+      { name: 'Overview', href: '/command-center', basePath: '/command-center', icon: LayoutDashboard },
+      { name: 'Disruptions', href: '/disruptions', basePath: '/disruptions', icon: Activity },
+      { name: 'Supply Chain', href: '/supply-chain', basePath: '/supply-chain', icon: Network },
     ]
   },
   {
     title: 'RECOVERY',
     items: [
-      { name: 'Recovery Plans', href: '/recovery-plans', icon: GitMerge },
-      { name: 'Scenarios', href: '/scenarios', icon: PlaySquare },
+      { name: 'Recovery Plans', href: '/recovery-plans', basePath: '/recovery-plans', icon: GitMerge },
+      { name: 'Scenarios', href: '/scenarios', basePath: '/scenarios', icon: PlaySquare },
     ]
   },
   {
     title: 'RISK & AUDIT',
     items: [
-      { name: 'Risk & Audit', href: '/risk-audit', icon: ShieldAlert },
-      { name: 'AI Insights', href: '/ai-insights', icon: Bot },
+      { name: 'Risk & Audit', href: '/risk', basePath: '/risk', icon: ShieldAlert },
     ]
   },
   {
     title: 'APPROVALS',
     items: [
-      { name: 'Approvals', href: '/approvals', icon: FileCheck, badge: 2 },
+      { name: 'Approvals', href: '/approvals', basePath: '/approvals', icon: FileCheck },
     ]
   },
   {
     title: 'EXECUTION',
     items: [
-      { name: 'SAP Actions', href: '/sap-actions', icon: Play },
-      { name: 'Action History', href: '/action-history', icon: Activity },
+      { name: 'SAP Actions', href: '/sap-actions', basePath: '/sap-actions', icon: Play },
+      { name: 'Action History', href: '/action-history', basePath: '/action-history', icon: Activity },
     ]
   }
 ];
 
 import { useSimulationStore } from '@/stores/useSimulationStore';
+import { fetchPersistedRecoveryPlans } from '@/services/api';
 
 export function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { activeDisruption } = useSimulationStore();
+  
+  const [pendingApprovalCount, setPendingApprovalCount] = useState<number>(0);
+
+  // Poll for pending approval count to keep badge fresh across workspace navigations
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const res = await fetchPersistedRecoveryPlans({ limit: 1 });
+        setPendingApprovalCount(res.total_pending_approval || 0);
+      } catch (e) {
+        // Silently ignore polling errors
+      }
+    };
+    
+    fetchCount();
+    const interval = setInterval(fetchCount, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const menuGroups = baseMenuGroups.map(group => {
-    // Filter out unimplemented routes like 'AI Insights'
     const filteredItems = group.items.filter(item => item.name !== 'AI Insights');
 
     return {
       ...group,
       items: filteredItems.map(item => {
+        // Only update the navigation href — never touch basePath (used for active-state matching)
         if (item.name === 'Disruptions') {
           return {
             ...item,
@@ -73,10 +91,10 @@ export function Sidebar() {
             href: '/recovery-plans'
           };
         }
-        if (item.name === 'Approvals' || item.name === 'Risk & Audit') {
+        if (item.name === 'Approvals') {
           return {
             ...item,
-            href: '/recovery-plans'
+            badge: pendingApprovalCount > 0 ? pendingApprovalCount : undefined
           };
         }
         return item;
@@ -104,7 +122,8 @@ export function Sidebar() {
             )}
             <nav className="space-y-0.5 px-3">
               {group.items.map((item) => {
-                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const matchBase = (item as any).basePath ?? item.href;
+                const isActive = pathname === matchBase || pathname.startsWith(`${matchBase}/`);
                 return (
                   <Link
                     key={item.name}

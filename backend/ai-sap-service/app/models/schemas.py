@@ -50,6 +50,7 @@ class CreateRecoveryPlanRequest(BaseModel):
     disruption_id: str
     material_id: str
     option_id: str
+    scenario_id: Optional[str] = None
 
 class RecoveryPlanResponse(BaseModel):
     id: str
@@ -67,4 +68,62 @@ class RecoveryPlanResponse(BaseModel):
     details: Optional[Dict[str, Any]] = None
 
 class UpdateStatusRequest(BaseModel):
+    status: str
+
+class RecoveryPlanListResponse(BaseModel):
+    items: List[RecoveryPlanResponse]
+    total: int
+    limit: int
+    offset: int
+    has_more: bool
+    total_active: int
+    total_pending_audit: int
+    total_pending_approval: int
+    total_completed: int
+    # Sum of total_cost across all matching plans (recovery procurement cost)
+    aggregate_plan_cost: float
+    # Sum of total_sla_exposure across all matching plans (SLA penalty risk)
+    aggregate_sla_exposure: float
+    # Kept for backward compat during transition, equals aggregate_plan_cost
+    aggregate_exposure: float
+
+class ScenarioResponse(BaseModel):
+    id: str
+    name: str
+    disruption_id: str
+    strategy: str
+    supplier_id: str
+    total_cost: float
+    max_delay_days: float
+    blended_risk: float
+    total_sla_exposure: float
+    final_score: float
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    details: Optional[Dict[str, Any]] = None
+
+    class Config:
+        from_attributes = True
+
+class ScenarioListResponse(BaseModel):
+    """Paginated scenario list with server-side aggregate KPIs."""
+    items: List[ScenarioResponse]
+    # Pagination metadata
+    total: int           # total matching records (after status/search filter)
+    limit: int
+    offset: int
+    has_more: bool
+    # Server-computed aggregate KPIs (over ALL matching records, not just current page)
+    total_active: int    # READY + SIMULATING
+    total_simulating: int
+    total_ready: int
+    total_selected: int
+    aggregate_sla_exposure: float  # sum of sla_exposure for READY+SIMULATING records
+
+class GenerateScenariosRequest(BaseModel):
+    disruption_id: str
+    material_id: str
+
+class UpdateScenarioStatusRequest(BaseModel):
     status: str

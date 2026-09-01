@@ -254,7 +254,7 @@ export function ImpactOverviewTab({ disruptionData, setActiveTab }: { disruption
                         stroke="none"
                       >
                         {[{ value: 57.5, fill: '#e2e8f0' }, { value: 42.5, fill: '#ef4444' }].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} className={index === 1 ? "drop-shadow-sm" : ""} />
+                          <Cell key={`impact-cell-${entry.fill.replace('#', '')}`} fill={entry.fill} className={index === 1 ? "drop-shadow-sm" : ""} />
                         ))}
                       </Pie>
                     </PieChart>

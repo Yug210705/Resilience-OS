@@ -58,7 +58,7 @@ function formatDate(iso: string) {
 
 const PAGE_SIZE = 25;
 
-export default function RecoveryPlansWorkspace() {
+export default function ApprovalWorkspace() {
   const router = useRouter();
   const [data, setData] = useState<RecoveryPlanListResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -70,7 +70,6 @@ export default function RecoveryPlansWorkspace() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [viewStatus, setViewStatus] = useState<string>('ALL');
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -80,21 +79,19 @@ export default function RecoveryPlansWorkspace() {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const loadData = useCallback(async (currentPage: number, currentSearch: string, currentStatus: string) => {
+  const loadData = useCallback(async (currentPage: number, currentSearch: string) => {
     setLoading(true);
     setError(null);
     try {
-      const statusParam = currentStatus === 'ALL' ? undefined : currentStatus;
       const res = await fetchPersistedRecoveryPlans({
         limit: PAGE_SIZE,
         offset: (currentPage - 1) * PAGE_SIZE,
         search: currentSearch || undefined,
-        status: statusParam
+        status: 'PENDING_APPROVAL'
       });
       setData(res);
       
       // Auto-select first plan if none selected or if current selection is not in the new page
-      // (This handles search/filter changes safely)
       if (res.items.length > 0) {
         if (!selectedPlanId || !res.items.find(p => p.id === selectedPlanId)) {
           setSelectedPlanId(res.items[0].id);
@@ -104,15 +101,15 @@ export default function RecoveryPlansWorkspace() {
       }
     } catch (err) {
       const e = err as Error;
-      setError(e.message || 'Unable to load recovery plans.');
+      setError(e.message || 'Unable to load approval queue.');
     } finally {
       setLoading(false);
     }
   }, [selectedPlanId]);
 
   useEffect(() => {
-    loadData(page, debouncedSearch, viewStatus);
-  }, [page, debouncedSearch, viewStatus]);
+    loadData(page, debouncedSearch);
+  }, [page, debouncedSearch]);
 
   const selectedPlan = data?.items.find(p => p.id === selectedPlanId) || null;
 
@@ -124,7 +121,7 @@ export default function RecoveryPlansWorkspace() {
     } else if (plan.status === 'APPROVED') {
       try {
         await updateRecoveryPlanStatus(plan.id, 'COMPLETED');
-        await loadData(page, debouncedSearch, viewStatus); // Refresh data
+        await loadData(page, debouncedSearch); // Refresh data
         router.push(`/sap-actions?sim=${plan.disruption_id}`);
       } catch (err) {
         const e = err as Error;
@@ -159,14 +156,14 @@ export default function RecoveryPlansWorkspace() {
             <div className="flex items-center space-x-2 text-[13px] text-slate-500 mb-2 font-medium">
               <Link href="/command-center" className="hover:text-slate-900 transition-colors">Command Center</Link>
               <span className="text-slate-300">/</span>
-              <span className="text-slate-900">Recovery Plans</span>
+              <span className="text-slate-900">Approvals</span>
             </div>
-            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Recovery Operations</h1>
-            <p className="text-[13px] text-slate-500 mt-1">Manage, audit, and execute active recovery plans across the enterprise.</p>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Authorization Queue</h1>
+            <p className="text-[13px] text-slate-500 mt-1">Review audited recovery plans pending final human authorization.</p>
           </div>
           
           <div className="flex items-center space-x-3">
-            <button onClick={() => loadData(page, debouncedSearch, viewStatus)} disabled={loading} className="flex items-center px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[13px] font-medium transition-colors shadow-sm disabled:opacity-50">
+            <button onClick={() => loadData(page, debouncedSearch)} disabled={loading} className="flex items-center px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-[13px] font-medium transition-colors shadow-sm disabled:opacity-50">
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} /> Refresh
             </button>
           </div>
@@ -190,57 +187,17 @@ export default function RecoveryPlansWorkspace() {
               <div className="xl:col-span-1 h-[400px] bg-white border border-slate-200 rounded-xl shadow-sm animate-pulse" />
             </div>
           </div>
-        ) : data?.total === 0 && !searchQuery && viewStatus === 'ALL' ? (
+        ) : data?.total === 0 && !searchQuery ? (
           <div className="flex-1 flex flex-col items-center justify-center bg-white border border-slate-200 rounded-xl shadow-sm py-32 text-center">
             <div className="w-12 h-12 bg-slate-50 border border-slate-100 rounded-xl flex items-center justify-center mb-4">
-              <Inbox className="w-6 h-6 text-slate-400" />
+              <CheckCircle2 className="w-6 h-6 text-emerald-500" />
             </div>
-            <h2 className="text-[15px] font-semibold text-slate-900">No active plans</h2>
-            <p className="text-[13px] text-slate-500 mt-1.5 max-w-sm mx-auto">There are currently no persisted recovery plans in the system.</p>
+            <h2 className="text-[15px] font-semibold text-slate-900">No recovery plans are currently awaiting approval.</h2>
+            <p className="text-[13px] text-slate-500 mt-1.5 max-w-sm mx-auto">All plans have been processed.</p>
           </div>
         ) : (
           <div className="flex-1 flex flex-col min-h-0 space-y-6">
             
-            {/* UNIFIED COMMAND STRIP */}
-            <div className="shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col sm:flex-row overflow-hidden divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
-              <div className="flex-1 p-5 flex items-center">
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mr-4 shrink-0">
-                  <Box className="w-4 h-4 text-slate-600" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Active Plans</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_active || 0}</div>
-                </div>
-              </div>
-              <div className="flex-1 p-5 flex items-center">
-                <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center mr-4 shrink-0">
-                  <Activity className="w-4 h-4 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Pending Audit</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_pending_audit || 0}</div>
-                </div>
-              </div>
-              <div className="flex-1 p-5 flex items-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mr-4 shrink-0">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Completed</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{data?.total_completed || 0}</div>
-                </div>
-              </div>
-              <div className="flex-1 p-5 flex items-center">
-                <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center mr-4 shrink-0">
-                  <TrendingDown className="w-4 h-4 text-indigo-600" />
-                </div>
-                <div>
-                  <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Plan Cost</p>
-                  <div className="text-xl font-semibold text-slate-900 mt-0.5 font-mono">{formatCurrency(data?.aggregate_exposure || 0)}</div>
-                </div>
-              </div>
-            </div>
-
             {/* MAIN WORKSPACE */}
             <div className="flex-1 min-h-0 grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
               
@@ -248,17 +205,7 @@ export default function RecoveryPlansWorkspace() {
               <div className="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col h-full min-h-0">
                 <div className="shrink-0 px-5 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white rounded-t-xl">
                   <div className="flex items-center space-x-2">
-                    <select 
-                      value={viewStatus}
-                      onChange={(e) => setViewStatus(e.target.value)}
-                      className="text-[13px] bg-slate-50 border border-slate-200 rounded-lg py-2 px-3 text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                    >
-                      <option value="ALL">All Plans</option>
-                      <option value="PENDING_AUDIT">Pending Audit</option>
-                      <option value="PENDING_APPROVAL">Pending Approval</option>
-                      <option value="APPROVED">Approved</option>
-                      <option value="COMPLETED">Completed</option>
-                    </select>
+                    <div className="text-[13px] font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-md">Pending Approval Queue</div>
                   </div>
                   <div className="relative flex-1 sm:w-64">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />

@@ -155,7 +155,7 @@ export function OrdersTab({ disruptionData }: { disruptionData: any }) {
                   />
                   <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={24}>
                     {customerImpactData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`customer-cell-${entry.name.replace(/\s+/g, '-')}`} fill={entry.color} />
                     ))}
                   </Bar>
                 </BarChart>
