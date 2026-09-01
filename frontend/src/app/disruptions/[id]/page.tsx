@@ -42,12 +42,20 @@ export default function ImpactAnalysisPage({ params }: { params: { id: string } 
             {activeDisruption.disruption.disruption_type} • {activeDisruption.disruption.affected_entity_id} • {activeDisruption.disruption.severity * 100}% CAPACITY LOSS • {activeDisruption.disruption.duration_days} DAYS
           </p>
         </div>
-        <Link 
-          href={`/recovery/${activeDisruption.simulation_id}`}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-md font-semibold text-sm shadow-sm flex items-center transition-colors"
-        >
-          Evaluate Recovery Options <ArrowRight className="w-4 h-4 ml-2" />
-        </Link>
+        <div className="flex space-x-3">
+          <Link 
+            href={`/live-demo/${activeDisruption.simulation_id}`}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-md font-semibold text-sm shadow-sm flex items-center transition-colors"
+          >
+            Launch Slide 8 Demo <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
+          <Link 
+            href={`/recovery/${activeDisruption.simulation_id}`}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-md font-semibold text-sm shadow-sm flex items-center transition-colors"
+          >
+            Evaluate Recovery Options <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
+        </div>
       </div>
       
       <ImpactSummary />
