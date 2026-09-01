@@ -1,0 +1,116 @@
+{
+  "suppliers": [
+    {
+      "supplier_id": "SUP-001",
+      "name": "GlobalTech Components",
+      "location": "Taiwan",
+      "status": "ACTIVE",
+      "capacity": 10000,
+      "risk_level": 0.8,
+      "reliability_score": 0.95
+    },
+    {
+      "supplier_id": "SUP-002",
+      "name": "AltSource Electronics",
+      "location": "Mexico",
+      "status": "ACTIVE",
+      "capacity": 5000,
+      "risk_level": 0.3,
+      "reliability_score": 0.85
+    }
+  ],
+  "materials": [
+    {
+      "material_id": "MAT-001",
+      "name": "Microchip Alpha",
+      "category": "Electronics",
+      "unit": "pcs",
+      "criticality": "HIGH"
+    }
+  ],
+  "supplier_materials": [
+    {
+      "supplier_id": "SUP-001",
+      "material_id": "MAT-001",
+      "lead_time_days": 14,
+      "cost": 150.0
+    },
+    {
+      "supplier_id": "SUP-002",
+      "material_id": "MAT-001",
+      "lead_time_days": 21,
+      "cost": 180.0
+    }
+  ],
+  "plants": [
+    {
+      "plant_id": "PLT-001",
+      "name": "Assembly Plant Y",
+      "location": "Germany",
+      "status": "ACTIVE",
+      "daily_capacity": 500
+    }
+  ],
+  "products": [
+    {
+      "product_id": "PRD-001",
+      "name": "Premium Server Product",
+      "category": "Servers",
+      "unit": "pcs",
+      "priority_level": 1
+    }
+  ],
+  "inventories": [
+    {
+      "inventory_id": "INV-001",
+      "plant_id": "PLT-001",
+      "material_id": "MAT-001",
+      "available_quantity": 200,
+      "safety_stock": 500
+    },
+    {
+      "inventory_id": "INV-002",
+      "plant_id": "PLT-001",
+      "product_id": "PRD-001",
+      "available_quantity": 50,
+      "safety_stock": 100
+    }
+  ],
+  "customers": [
+    {
+      "customer_id": "CUS-001",
+      "name": "Enterprise Corp",
+      "location": "USA",
+      "priority_tier": 1
+    }
+  ],
+  "customer_orders": [
+    {
+      "order_id": "ORD-001",
+      "customer_id": "CUS-001",
+      "product_id": "PRD-001",
+      "quantity": 100,
+      "due_date": "2026-09-15T00:00:00Z",
+      "status": "PENDING",
+      "revenue_value": 1000000.0
+    }
+  ],
+  "routes": [
+    {
+      "route_id": "RT-001",
+      "source_id": "SUP-001",
+      "target_id": "PLT-001",
+      "transport_mode": "AIR",
+      "transit_time_days": 3,
+      "status": "ACTIVE"
+    },
+    {
+      "route_id": "RT-002",
+      "source_id": "PLT-001",
+      "target_id": "CUS-001",
+      "transport_mode": "AIR",
+      "transit_time_days": 2,
+      "status": "ACTIVE"
+    }
+  ]
+}
