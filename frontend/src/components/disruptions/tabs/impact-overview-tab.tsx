@@ -20,7 +20,10 @@ const inventoryData = [
   { day: 'May 29', coverage: 0 },
 ];
 
-export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
+import { useState } from 'react';
+
+export function ImpactOverviewTab({ disruptionData, setActiveTab }: { disruptionData: any, setActiveTab?: (tab: string) => void }) {
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const summary = disruptionData?.summary || {};
   
   const kpis = [
@@ -56,7 +59,10 @@ export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
       {/* Middle Row: Graph and Details */}
       <div className="flex flex-col xl:flex-row gap-6">
         {/* Dependency Graph */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex-1 min-w-0">
+        <div className={cn(
+          "bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex-1 min-w-0 flex flex-col",
+          isFullScreen ? "fixed inset-4 z-50 flex flex-col shadow-2xl" : ""
+        )}>
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center text-sm font-bold text-slate-900 dark:text-white">
               Dependency Graph
@@ -69,15 +75,29 @@ export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
               <button className="px-3 py-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-[12px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">
                 Fit View
               </button>
-              <button className="p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800">
+              <button 
+                onClick={() => setIsFullScreen(!isFullScreen)}
+                className={cn(
+                  "p-1.5 border border-slate-200 dark:border-slate-800 rounded-lg transition-colors",
+                  isFullScreen ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/30 dark:border-blue-800" : "text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800"
+                )}
+              >
                 <Maximize className="w-4 h-4" />
               </button>
             </div>
           </div>
-          <div className="h-[400px] rounded-lg overflow-hidden relative border border-slate-200 dark:border-slate-800">
+          <div className="flex-1 min-h-[400px] w-full rounded-lg overflow-hidden relative border border-slate-200 dark:border-slate-800">
              <SupplyChainGraph />
           </div>
         </div>
+        
+        {/* Full Screen Backdrop */}
+        {isFullScreen && (
+          <div 
+            className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+            onClick={() => setIsFullScreen(false)} 
+          />
+        )}
         
         {/* Right Sidebar: Impact Details */}
         <div className="w-full xl:w-[320px] shrink-0">
@@ -96,33 +116,41 @@ export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
                 <div className="text-[11px] font-medium text-slate-500 mb-1">Disrupted Entity</div>
                 <div className="text-sm font-semibold text-slate-900 dark:text-white">SUP-007 - Pacific Electronics</div>
               </div>
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 mb-1">Severity</div>
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">100%</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 mb-1">Duration</div>
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">10 Days</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 mb-1">Affected Regions</div>
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">Asia Pacific, India</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 mb-1">Category</div>
-                <div className="text-sm font-semibold text-slate-900 dark:text-white">Electronics Components</div>
-              </div>
-              <div>
-                <div className="text-[11px] font-medium text-slate-500 mb-1">Description</div>
-                <div className="text-[13px] font-medium text-slate-900 dark:text-white leading-relaxed">
-                  Complete capacity loss at supplier due to facility shutdown caused by port congestion and raw material unavailability.
+              <div className="bg-slate-50 dark:bg-slate-900/50 p-6 flex flex-col justify-between relative overflow-hidden">
+                {/* The decorative gradient bar on the side */}
+                <div className="absolute top-0 bottom-0 left-0 w-1 bg-gradient-to-b from-blue-500 to-indigo-600"></div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <div className="text-[11px] font-medium text-slate-500 mb-1">Affected Entity</div>
+                    <div className="text-xl font-black flex items-center text-slate-900 dark:text-white">
+                      {disruptionData?.disruption?.affected_entity_id || 'SUP-007'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-medium text-slate-500 mb-1">Region</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Asia Pacific, India</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-medium text-slate-500 mb-1">Category</div>
+                    <div className="text-sm font-semibold text-slate-900 dark:text-white">Electronics Components</div>
+                  </div>
+                  <div>
+                    <div className="text-[11px] font-medium text-slate-500 mb-1">Description</div>
+                    <div className="text-[13px] font-medium text-slate-900 dark:text-white leading-relaxed">
+                      Complete capacity loss at supplier due to facility shutdown caused by port congestion and raw material unavailability.
+                    </div>
+                  </div>
                 </div>
+                
+                <button 
+                  onClick={() => setActiveTab && setActiveTab('Explanations')}
+                  className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-md flex items-center justify-center transition-colors shadow-sm text-sm"
+                >
+                  <FileText className="w-4 h-4 mr-2" /> View Explanation
+                </button>
               </div>
             </div>
-            
-            <button className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-md flex items-center justify-center transition-colors shadow-sm text-sm">
-              <FileText className="w-4 h-4 mr-2" /> View Explanation
-            </button>
           </div>
         </div>
       </div>
@@ -131,145 +159,176 @@ export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Card 1: Inventory Coverage */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col">
-          <h3 className="text-sm font-bold flex items-center mb-4">
-            Inventory Coverage <span className="text-slate-500 font-normal ml-1">(Material: MAT-004)</span> <Info className="w-4 h-4 text-slate-400 ml-2" />
-          </h3>
-          <div className="mb-4">
-            <div className="text-lg font-extrabold text-slate-900 dark:text-white mb-2">3.0 days remaining</div>
-            <div className="flex space-x-8 text-sm">
+        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col group hover:shadow-md transition-shadow duration-300">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800/60">
+            <h3 className="text-[15px] font-extrabold flex items-center mb-5 text-slate-900 dark:text-white">
+              Inventory Coverage 
+              <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full ml-3 font-bold border border-blue-200 dark:border-blue-800/50">MAT-004</span>
+              <Info className="w-4 h-4 text-slate-400 ml-auto cursor-help hover:text-slate-600 transition-colors" />
+            </h3>
+            <div className="flex justify-between items-end">
               <div>
-                <div className="text-slate-500 text-xs">Current Inventory</div>
-                <div className="font-bold">1,240 units</div>
+                <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Time to Exhaustion</div>
+                <div className="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">3.0 <span className="text-lg font-bold text-slate-500 dark:text-slate-400">days</span></div>
               </div>
-              <div>
-                <div className="text-slate-500 text-xs">Daily Consumption</div>
-                <div className="font-bold">420 units/day</div>
+              <div className="flex space-x-6 text-right">
+                <div>
+                  <div className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">On Hand</div>
+                  <div className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">1,240 <span className="text-[10px] font-medium text-slate-500">u</span></div>
+                </div>
+                <div>
+                  <div className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Burn Rate</div>
+                  <div className="font-extrabold text-slate-800 dark:text-slate-200 text-sm">420 <span className="text-[10px] font-medium text-slate-500">u/d</span></div>
+                </div>
               </div>
             </div>
           </div>
-          <div className="flex-1 w-full relative h-[160px]">
+          
+          <div className="flex-1 w-full relative h-[180px] p-4 bg-slate-50/50 dark:bg-[#0A0F1C]/30 rounded-b-xl">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={inventoryData} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} dy={5} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(val) => `${val}d`} domain={[0, 8]} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.6} />
+                <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `${val}d`} domain={[0, 8]} />
                 
-                <ReferenceArea x1="May 20" x2="May 29" fill="#fee2e2" fillOpacity={0.4} />
-                <ReferenceLine x="May 20" stroke="#ef4444" strokeDasharray="3 3" />
+                <ReferenceArea x1="May 20" x2="May 29" fill="#ef4444" fillOpacity={0.15} />
+                <ReferenceLine x="May 20" stroke="#ef4444" strokeDasharray="4 4" strokeWidth={2} />
                 
-                <Line type="monotone" dataKey="coverage" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, fill: '#3b82f6' }} />
+                <Line type="monotone" dataKey="coverage" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#ffffff', stroke: '#3b82f6', strokeWidth: 2 }} activeDot={{ r: 6, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }} />
               </LineChart>
             </ResponsiveContainer>
-            <div className="absolute top-2 right-12 text-red-500 text-[10px] font-bold text-center">
-              Shortage starts<br/>May 20 (Day 3)
+            <div className="absolute top-4 right-10 bg-red-100 dark:bg-red-900/80 text-red-700 dark:text-red-200 border border-red-200 dark:border-red-700/50 text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+              Shortage Starts<br/><span className="text-red-900 dark:text-white font-black">May 20 (Day 3)</span>
             </div>
-          </div>
-          <div className="flex items-center space-x-4 mt-4 text-[10px] font-semibold text-slate-500">
-            <div className="flex items-center"><div className="w-2 h-2 bg-blue-500 transform rotate-45 mr-1.5"></div> Inventory Coverage (Days)</div>
-            <div className="flex items-center"><div className="w-3 h-0.5 border-t-2 border-dashed border-red-500 mr-1.5"></div> Shortage Threshold</div>
           </div>
         </div>
 
         {/* Card 2: Production Impact */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-          <div>
-            <h3 className="text-sm font-bold flex items-center mb-6">
-              Production Impact <span className="text-slate-500 font-normal ml-1">[Plant: PLANT-002]</span> <Info className="w-4 h-4 text-slate-400 ml-2" />
+        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col group hover:shadow-md transition-shadow duration-300">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800/60">
+            <h3 className="text-[15px] font-extrabold flex items-center text-slate-900 dark:text-white mb-1">
+              Production Impact
+              <Info className="w-4 h-4 text-slate-400 ml-auto cursor-help hover:text-slate-600 transition-colors" />
             </h3>
+            <div className="text-[12px] font-semibold text-slate-500 flex items-center mb-6">
+              <MapPin className="w-3 h-3 mr-1" /> PLANT-002
+            </div>
             
             <div className="flex">
-              <div className="flex-1 space-y-6">
+              <div className="flex-1 space-y-7">
                 <div>
-                  <div className="text-xs text-slate-500 mb-1">Normal Capacity</div>
-                  <div className="font-extrabold text-slate-900 dark:text-white mb-2">2,000 units/day</div>
-                  <div className="w-full bg-blue-600 h-1.5 rounded-full"></div>
+                  <div className="flex justify-between items-end mb-2">
+                    <div className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Baseline Capacity</div>
+                    <div className="font-black text-slate-900 dark:text-white text-sm">2,000 <span className="text-[10px] font-semibold text-slate-500">u/d</span></div>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner">
+                    <div className="bg-blue-500 w-full h-full rounded-full"></div>
+                  </div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500 mb-1">Disrupted Capacity</div>
-                  <div className="font-extrabold text-slate-900 dark:text-white mb-2">1,150 units/day</div>
-                  <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full flex overflow-hidden">
-                    <div className="bg-red-500 w-[42.5%] h-full"></div>
+                  <div className="flex justify-between items-end mb-2">
+                    <div className="text-[11px] font-bold text-red-500 dark:text-red-400 uppercase tracking-wider flex items-center">
+                      <AlertTriangle className="w-3 h-3 mr-1" /> Disrupted Capacity
+                    </div>
+                    <div className="font-black text-red-600 dark:text-red-400 text-sm">1,150 <span className="text-[10px] font-semibold text-red-400/70">u/d</span></div>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner flex">
+                    <div className="bg-red-500 w-[57.5%] h-full rounded-l-full relative overflow-hidden">
+                       <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]"></div>
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className="w-32 flex flex-col items-center justify-center relative pl-4">
-                <div className="w-24 h-24 relative">
+              <div className="w-36 flex flex-col items-center justify-center relative pl-6 border-l border-slate-100 dark:border-slate-800/60 ml-6">
+                <div className="w-20 h-20 relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={[{ value: 57.5, fill: '#e2e8f0' }, { value: 42.5, fill: '#ef4444' }]}
-                        innerRadius={30}
-                        outerRadius={40}
+                        data={[{ value: 57.5, fill: '#3b82f6' }, { value: 42.5, fill: '#ef4444' }]}
+                        innerRadius={28}
+                        outerRadius={38}
                         dataKey="value"
                         startAngle={90}
                         endAngle={-270}
                         stroke="none"
                       >
                         {[{ value: 57.5, fill: '#e2e8f0' }, { value: 42.5, fill: '#ef4444' }].map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.fill} />
+                          <Cell key={`cell-${index}`} fill={entry.fill} className={index === 1 ? "drop-shadow-sm" : ""} />
                         ))}
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="absolute inset-0 flex items-center justify-center font-extrabold text-slate-900 dark:text-white">
+                  <div className="absolute inset-0 flex items-center justify-center font-black text-slate-900 dark:text-white text-sm">
                     42.5%
                   </div>
                 </div>
-                <div className="text-[10px] font-semibold text-slate-500 mt-2">Production Loss</div>
+                <div className="text-[10px] font-bold text-red-500 uppercase tracking-wider mt-3 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded border border-red-100 dark:border-red-900/30">
+                  Deficit
+                </div>
               </div>
             </div>
           </div>
           
-          <Link href="#" className="text-blue-600 text-xs font-bold hover:underline flex items-center mt-4">
-            View Plant Impact Details <ArrowRight className="w-3 h-3 ml-1" />
-          </Link>
+          <div className="p-4 bg-slate-50 dark:bg-[#0A0F1C]/50 rounded-b-xl mt-auto">
+            <Link href="#" className="text-blue-600 dark:text-blue-400 text-[13px] font-bold hover:text-blue-700 dark:hover:text-blue-300 flex items-center group">
+              View comprehensive plant analysis <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
         </div>
         
         {/* Card 3: Top Affected Orders */}
-        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex flex-col justify-between">
-           <div>
-             <div className="flex justify-between items-center mb-4">
-               <h3 className="text-sm font-bold flex items-center">
-                 Top Affected Orders <Info className="w-4 h-4 text-slate-400 ml-2" />
-               </h3>
-               <button className="text-blue-600 text-xs font-semibold hover:underline">View all orders</button>
-             </div>
-             <table className="w-full text-xs text-left mb-2">
-               <thead className="text-[10px] text-slate-500 border-b border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow duration-300">
+           <div className="p-6 pb-0 flex justify-between items-center mb-5">
+             <h3 className="text-[15px] font-extrabold flex items-center text-slate-900 dark:text-white">
+               Top Affected Orders <Info className="w-4 h-4 text-slate-400 ml-2 cursor-help hover:text-slate-600 transition-colors" />
+             </h3>
+             <button className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+               View All
+             </button>
+           </div>
+           
+           <div className="px-1 mb-2">
+             <table className="w-full text-xs text-left">
+               <thead className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50 dark:bg-slate-900/50">
                  <tr>
-                   <th className="pb-2 font-medium">Order ID</th>
-                   <th className="pb-2 font-medium">Customer</th>
-                   <th className="pb-2 font-medium">Product</th>
-                   <th className="pb-2 font-medium">Shortfall</th>
-                   <th className="pb-2 font-medium">Delay</th>
-                   <th className="pb-2 font-medium">Revenue at Risk</th>
+                   <th className="py-2.5 pl-5 rounded-l-lg">Order ID</th>
+                   <th className="py-2.5">Customer</th>
+                   <th className="py-2.5 text-center">Delay</th>
+                   <th className="py-2.5 pr-5 text-right rounded-r-lg">At Risk</th>
                  </tr>
                </thead>
-               <tbody className="space-y-1">
+               <tbody className="divide-y divide-slate-50 dark:divide-slate-800/60">
                  {[
-                   { id: 'ORD-1042', customer: 'Enterprise A', product: 'PRD-008', shortfall: '300 units', delay: '4 days', rev: '₹4.5 L' },
-                   { id: 'ORD-1043', customer: 'Enterprise B', product: 'PRD-003', shortfall: '150 units', delay: '3 days', rev: '₹2.1 L' },
-                   { id: 'ORD-1044', customer: 'Retail Corp', product: 'PRD-010', shortfall: '200 units', delay: '5 days', rev: '₹3.2 L' },
-                   { id: 'ORD-1045', customer: 'Global Industries', product: 'PRD-008', shortfall: '120 units', delay: '4 days', rev: '₹1.8 L' },
-                   { id: 'ORD-1046', customer: 'Tech Solutions', product: 'PRD-003', shortfall: '100 units', delay: '2 days', rev: '₹1.2 L' },
+                   { id: 'ORD-1042', customer: 'Enterprise A', delay: '4 days', rev: '₹4.5 L', critical: true },
+                   { id: 'ORD-1044', customer: 'Retail Corp', delay: '5 days', rev: '₹3.2 L', critical: true },
+                   { id: 'ORD-1043', customer: 'Enterprise B', delay: '3 days', rev: '₹2.1 L', critical: false },
+                   { id: 'ORD-1045', customer: 'Global Ind.', delay: '4 days', rev: '₹1.8 L', critical: false },
+                   { id: 'ORD-1046', customer: 'Tech Sol.', delay: '2 days', rev: '₹1.2 L', critical: false },
                  ].map((o, i) => (
-                   <tr key={i} className="text-slate-900 dark:text-slate-300">
-                     <td className="py-2.5 font-medium">{o.id}</td>
-                     <td className="py-2.5 text-slate-500">{o.customer}</td>
-                     <td className="py-2.5 text-slate-500">{o.product}</td>
-                     <td className="py-2.5">{o.shortfall}</td>
-                     <td className="py-2.5 text-red-500 font-medium">{o.delay}</td>
-                     <td className="py-2.5 font-semibold">{o.rev}</td>
+                   <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors group/row cursor-pointer">
+                     <td className="py-3 pl-5 font-bold text-slate-900 dark:text-slate-200">{o.id}</td>
+                     <td className="py-3 font-semibold text-slate-600 dark:text-slate-400 truncate max-w-[90px]">{o.customer}</td>
+                     <td className="py-3 text-center">
+                        <span className={cn(
+                          "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider",
+                          o.critical ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50" : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50"
+                        )}>
+                          {o.delay}
+                        </span>
+                     </td>
+                     <td className="py-3 pr-5 font-black text-slate-900 dark:text-white text-right group-hover/row:text-blue-600 dark:group-hover/row:text-blue-400 transition-colors">{o.rev}</td>
                    </tr>
                  ))}
                </tbody>
              </table>
            </div>
-           <Link href="#" className="text-blue-600 text-xs font-bold hover:underline flex items-center mt-2">
-             View all 124 affected orders <ArrowRight className="w-3 h-3 ml-1" />
-           </Link>
+           
+           <div className="p-4 bg-slate-50 dark:bg-[#0A0F1C]/50 rounded-b-xl border-t border-slate-100 dark:border-slate-800/60 mt-auto">
+             <Link href="#" className="text-blue-600 dark:text-blue-400 text-[13px] font-bold hover:text-blue-700 dark:hover:text-blue-300 flex items-center group">
+               View all 124 affected orders <ArrowRight className="w-3.5 h-3.5 ml-1.5 group-hover:translate-x-1 transition-transform" />
+             </Link>
+           </div>
         </div>
       </div>
       

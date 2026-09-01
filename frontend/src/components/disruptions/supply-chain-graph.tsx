@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useMemo } from 'react';
-import { ReactFlow, Controls, Background, Edge, Node, Position } from '@xyflow/react';
+import { ReactFlow, Controls, Background, Edge, Node, Position, Handle } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
 import { useTheme } from 'next-themes';
@@ -8,6 +8,43 @@ import { useSimulationStore } from '@/stores/useSimulationStore';
 
 const nodeWidth = 140;
 const nodeHeight = 40;
+
+const CustomNode = ({ data, isConnectable }: any) => {
+  const { color, label, sub } = data;
+  
+  if (color === 'none') {
+    return (
+      <div style={{ background: 'transparent', border: 'none', width: nodeWidth, height: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400">{label}</div>
+      </div>
+    );
+  }
+
+  const borderColor = color === 'red' ? '#ef4444' : color === 'amber' ? '#f59e0b' : color === 'yellow' ? '#eab308' : '#10b981';
+  
+  return (
+    <div style={{
+      borderRadius: '8px',
+      border: `1.5px solid ${borderColor}`,
+      width: nodeWidth,
+      height: nodeHeight,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+    }} className="bg-white dark:bg-[#111827]">
+      <Handle type="target" position={Position.Left} isConnectable={isConnectable} style={{ opacity: 0 }} />
+      <div className="flex flex-col items-center justify-center h-full w-full">
+        <span style={{ color: borderColor, fontSize: '11px', fontWeight: 800 }}>{label}</span>
+        <span style={{ color: borderColor, fontSize: '9px', fontWeight: 600 }}>{sub}</span>
+      </div>
+      <Handle type="source" position={Position.Right} isConnectable={isConnectable} style={{ opacity: 0 }} />
+    </div>
+  );
+};
+
+const nodeTypes = { customNode: CustomNode };
 
 const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'LR') => {
   const dagreGraph = new dagre.graphlib.Graph();
@@ -106,8 +143,15 @@ export function SupplyChainGraph() {
     }
 
     // Process nodes from API arrays (limit to 3 for visual cleanliness per column)
+    const affectedSuppliers = activeDisruption.affected_suppliers || [];
+    if (activeDisruption.disruption?.disruption_type?.toLowerCase() === 'supplier' || activeDisruption.disruption?.affected_entity_id?.startsWith('SUP')) {
+      if (affectedSuppliers.length === 0 && activeDisruption.disruption?.affected_entity_id) {
+        affectedSuppliers.push({ id: activeDisruption.disruption.affected_entity_id, risk_score: 1.0 });
+      }
+    }
+
     const layers = [
-      { array: activeDisruption.affected_suppliers || [], prefix: '', type: 'SUP' },
+      { array: affectedSuppliers, prefix: '', type: 'SUP' },
       { array: activeDisruption.affected_materials || [], prefix: 'mat-', type: 'MAT' },
       { array: activeDisruption.affected_plants || [], prefix: 'plt-', type: 'PLT' },
       { array: activeDisruption.affected_products || [], prefix: 'prd-', type: 'PRD' },
@@ -192,53 +236,16 @@ export function SupplyChainGraph() {
 
     // Apply styles to all nodes
     nodes.forEach(n => {
-      const cStr = n.data.color;
-      
-      if (cStr === 'none') {
-        n.style = {
-          background: 'transparent',
-          border: 'none',
-          width: nodeWidth,
-          height: 20,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        };
-        n.data.label = (
-          <div className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
-            {n.data.label as string}
-          </div>
-        );
-        return;
-      }
-
-      const borderColor = cStr === 'red' ? '#ef4444' : cStr === 'amber' ? '#f59e0b' : cStr === 'yellow' ? '#eab308' : '#10b981';
-      const textColor = cStr === 'red' ? '#ef4444' : cStr === 'amber' ? '#f59e0b' : cStr === 'yellow' ? '#eab308' : '#10b981';
-      
-      n.style = {
-        borderRadius: '8px',
-        background: isDark ? '#111827' : '#ffffff',
-        border: `1.5px solid ${borderColor}`,
-        width: nodeWidth,
-        height: nodeHeight,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
-      };
-      
-      n.data.label = (
-        <div className="flex flex-col items-center justify-center h-full w-full">
-          <span style={{ color: textColor, fontSize: '11px', fontWeight: 800 }}>{n.data.label as string}</span>
-          <span style={{ color: textColor, fontSize: '9px', fontWeight: 600 }}>{n.data.sub as string}</span>
-        </div>
-      );
+      n.type = 'customNode'; // Use our new custom node!
     });
 
     if (nodes.length === 0) return { layoutedNodes: [], layoutedEdges: [] };
 
+    if (nodes.length === 0) return { layoutedNodes: [], layoutedEdges: [] };
+
     const layouted = getLayoutedElements(nodes, edges);
+    console.log("Layouted Nodes:", layouted.nodes);
+    console.log("Layouted Edges:", layouted.edges);
     return { layoutedNodes: layouted.nodes, layoutedEdges: layouted.edges };
   }, [isDark, activeDisruption]);
 
@@ -257,7 +264,8 @@ export function SupplyChainGraph() {
       
       <ReactFlow 
         nodes={layoutedNodes} 
-        edges={layoutedEdges} 
+        edges={layoutedEdges}
+        nodeTypes={nodeTypes}
         fitView 
         fitViewOptions={{ padding: 0.2 }}
         minZoom={0.2} 
