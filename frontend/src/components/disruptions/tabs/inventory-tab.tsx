@@ -96,7 +96,7 @@ export function InventoryTab({ disruptionData }: { disruptionData: any }) {
               </div>
             </div>
             
-            <div className="flex-1 w-full relative min-h-[300px]">
+            <div className="flex-1 w-full relative h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={inventoryData} margin={{ top: 20, right: 30, left: -20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

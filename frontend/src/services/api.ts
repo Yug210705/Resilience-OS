@@ -30,3 +30,20 @@ export async function fetchVulnerabilities() {
   if (!res.ok) throw new Error("Failed to fetch vulnerabilities");
   return res.json();
 }
+
+const AI_API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'http://127.0.0.1:8001';
+
+export async function fetchRecoveryPlans(materialId: string) {
+  const res = await fetch(`${AI_API_URL}/api/recovery/plans?material_id=${encodeURIComponent(materialId)}`);
+  if (!res.ok) {
+    let errorDetail = "Unknown error";
+    try {
+      const errJson = await res.json();
+      errorDetail = errJson.detail || JSON.stringify(errJson);
+    } catch(e) {
+      errorDetail = await res.text();
+    }
+    throw new Error(`SAP or Engine Error: ${errorDetail}`);
+  }
+  return res.json();
+}

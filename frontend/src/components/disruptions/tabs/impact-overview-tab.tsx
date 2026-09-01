@@ -148,7 +148,7 @@ export function ImpactOverviewTab({ disruptionData }: { disruptionData: any }) {
               </div>
             </div>
           </div>
-          <div className="flex-1 w-full relative min-h-[160px]">
+          <div className="flex-1 w-full relative h-[160px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={inventoryData} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />

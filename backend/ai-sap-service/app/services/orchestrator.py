@@ -44,6 +44,38 @@ class AuditLog(BaseModel):
     agentic_retries: int = 0
     sap_action_result: dict
 
+class RecoveryPlansResponse(BaseModel):
+    material_id: str
+    sap_input_data: dict
+    ranked_plans: List[dict]
+    total_revenue_at_risk: float
+
+async def get_recovery_plans(material_id: str) -> RecoveryPlansResponse:
+    logger.info("Fetching recovery plans", material_id=material_id)
+    raw_sap_data = None
+    
+    try:
+        raw_sap_data = await asyncio.wait_for(sap_adapter.get_supply_data(material_id), timeout=3.0)
+        sap_cache[material_id] = raw_sap_data
+    except Exception as e:
+        logger.warning("SAP unreachable, falling back to cached last-known-good shortage data", error=str(e))
+        raw_sap_data = sap_cache.get(material_id)
+        if not raw_sap_data:
+            raise RuntimeError("SAP unreachable and no cached data available.")
+
+    shortage_data = ShortageData(**raw_sap_data)
+    plans = generate_plans(shortage_data)
+    ranked_plans = score_plans(plans)
+    
+    total_revenue = sum(o.revenue_at_risk for o in shortage_data.affected_orders)
+    
+    return RecoveryPlansResponse(
+        material_id=material_id,
+        sap_input_data=raw_sap_data,
+        ranked_plans=[p.model_dump() for p in ranked_plans],
+        total_revenue_at_risk=total_revenue
+    )
+
 async def run_recovery_pipeline(material_id: str, inject_failure: str = None) -> AuditLog:
     """
     Runs the 6-step Resilience OS pipeline.

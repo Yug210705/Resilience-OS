@@ -3,7 +3,7 @@ from fastapi import FastAPI, HTTPException, Response
 import json
 import os
 
-from app.services.orchestrator import run_recovery_pipeline, AuditLog
+from app.services.orchestrator import run_recovery_pipeline, AuditLog, get_recovery_plans, RecoveryPlansResponse
 
 app = FastAPI(
     title="RESILIENCE OS API",
@@ -16,7 +16,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+@app.get("/api/recovery/plans", response_model=RecoveryPlansResponse, summary="Get Ranked Recovery Plans", description="Generates deterministic recovery plans based on SAP supply data without executing.")
+async def api_get_recovery_plans(material_id: str = "MAT-12"):
+    try:
+        return await get_recovery_plans(material_id)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=str(e))
 
 @app.post("/run-recovery", response_model=AuditLog, summary="Run Full Recovery Pipeline", description="Executes the 6-step detect/optimize/explain/validate/act/audit pipeline.")
 async def run_recovery(response: Response, material_id: str = "MAT-12"):

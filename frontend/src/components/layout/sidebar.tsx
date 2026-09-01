@@ -54,18 +54,41 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const { activeDisruption } = useSimulationStore();
 
-  const menuGroups = baseMenuGroups.map(group => ({
-    ...group,
-    items: group.items.map(item => {
-      if (item.name === 'Disruptions') {
-        return {
-          ...item,
-          href: activeDisruption ? `/disruptions/${activeDisruption.simulation_id}` : '/disruptions'
-        };
-      }
-      return item;
-    })
-  }));
+  const menuGroups = baseMenuGroups.map(group => {
+    // Filter out unimplemented routes like 'AI Insights'
+    const filteredItems = group.items.filter(item => item.name !== 'AI Insights');
+
+    return {
+      ...group,
+      items: filteredItems.map(item => {
+        if (item.name === 'Disruptions') {
+          return {
+            ...item,
+            href: activeDisruption ? `/disruptions/${activeDisruption.simulation_id}` : '/disruptions'
+          };
+        }
+        if (item.name === 'Recovery Plans') {
+          return {
+            ...item,
+            href: '/recovery-plans'
+          };
+        }
+        if (item.name === 'Approvals') {
+          return {
+            ...item,
+            href: activeDisruption ? `/approvals/${activeDisruption.simulation_id}` : '/command-center'
+          };
+        }
+        if (item.name === 'Risk & Audit') {
+          return {
+            ...item,
+            href: activeDisruption ? `/risk/${activeDisruption.simulation_id}` : '/command-center'
+          };
+        }
+        return item;
+      })
+    };
+  });
 
   return (
     <div className={cn(
@@ -107,12 +130,12 @@ export function Sidebar() {
                     )} />
                     {!collapsed && <span>{item.name}</span>}
                     
-                    {!collapsed && item.badge && (
+                    {!collapsed && (item as any).badge && (
                       <span className="ml-auto bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 py-0.5 px-2 rounded-full text-[10px] font-bold">
-                        {item.badge}
+                        {(item as any).badge}
                       </span>
                     )}
-                    {collapsed && item.badge && (
+                    {collapsed && (item as any).badge && (
                       <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                     )}
                   </Link>
