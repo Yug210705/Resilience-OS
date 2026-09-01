@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Factory, Truck, Package, Box, Users, Search, Filter, ArrowDownToLine, ChevronDown, ChevronRight, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,24 +16,42 @@ interface Entity {
   status: string;
 }
 
-const mockEntities: Entity[] = [
-  { id: 'SUP-007', name: 'TechComponents Ltd (Taiwan)', type: 'Supplier', impact: '100% capacity offline', severity: 'Critical', owner: 'Sarah J.', status: 'Mitigation Started' },
-  { id: 'MAT-004', name: 'Battery Cell (High Cap)', type: 'Material', impact: 'Exhausts in 3.0 days', severity: 'Critical', owner: 'Mike T.', status: 'Sourcing Alt.' },
-  { id: 'MAT-009', name: 'Microcontroller (Type B)', type: 'Material', impact: 'Exhausts in 7.8 days', severity: 'Medium', owner: 'Mike T.', status: 'Monitoring' },
-  { id: 'PLANT-002', name: 'Jaipur Manufacturing', type: 'Plant', impact: '42.5% prod. loss (850 u/d)', severity: 'Critical', owner: 'Raj K.', status: 'Re-routing' },
-  { id: 'PLANT-003', name: 'Pune Assembly', type: 'Plant', impact: '43.3% prod. loss (780 u/d)', severity: 'Critical', owner: 'Priya M.', status: 'Re-routing' },
-  { id: 'PRD-008', name: 'Smart Device X', type: 'Product', impact: '55.6% volume at risk', severity: 'High', owner: 'Elena G.', status: 'Allocating' },
-  { id: 'PRD-003', name: 'Power Module', type: 'Product', impact: '47.5% volume at risk', severity: 'High', owner: 'Elena G.', status: 'Allocating' },
-  { id: 'CUST-104', name: 'Global Retail Corp', type: 'Customer', impact: '4,500 units delayed', severity: 'Critical', owner: 'David W.', status: 'Notified' },
-  { id: 'CUST-089', name: 'TechStore EU', type: 'Customer', impact: '1,200 units delayed', severity: 'Medium', owner: 'Anna L.', status: 'Pending' },
-];
-
 export function AffectedEntitiesTab({ disruptionData }: { disruptionData: any }) {
   const [activeTab, setActiveTab] = useState<string>('All');
   
+  const entitiesList = useMemo(() => {
+    if (!disruptionData) return [];
+    
+    const entities: Entity[] = [];
+    
+    const getSev = (i: number): Severity => i === 0 ? 'Critical' : i % 2 === 0 ? 'High' : 'Medium';
+    
+    (disruptionData.affected_suppliers || []).forEach((s: any, i: number) => {
+       entities.push({ id: s.id, name: `Supplier ${s.id}`, type: 'Supplier', impact: 'Capacity constrained', severity: getSev(i), owner: 'Supply Team', status: 'Pending' });
+    });
+    
+    (disruptionData.affected_materials || []).forEach((m: any, i: number) => {
+       entities.push({ id: m.id, name: `Material ${m.id}`, type: 'Material', impact: 'Shortage projected', severity: getSev(i), owner: 'Procurement', status: 'Pending' });
+    });
+
+    (disruptionData.affected_plants || []).forEach((p: any, i: number) => {
+       entities.push({ id: p.id, name: `Plant ${p.id}`, type: 'Plant', impact: 'Production halted', severity: getSev(i), owner: 'Operations', status: 'Pending' });
+    });
+
+    (disruptionData.affected_products || []).forEach((p: any, i: number) => {
+       entities.push({ id: p.id, name: `Product ${p.id}`, type: 'Product', impact: 'Volume at risk', severity: getSev(i), owner: 'Sales', status: 'Pending' });
+    });
+
+    (disruptionData.affected_orders || []).forEach((o: any, i: number) => {
+       entities.push({ id: o.order_id || o.id, name: `Order ${o.order_id || o.id}`, type: 'Customer', impact: `${o.shortfall_quantity || 'Unknown'} units delayed`, severity: getSev(i), owner: 'Account Exec', status: 'Pending' });
+    });
+    
+    return entities;
+  }, [disruptionData]);
+
   const filteredEntities = activeTab === 'All' 
-    ? mockEntities 
-    : mockEntities.filter(e => e.type === activeTab || (activeTab === 'Materials' && e.type === 'Material') || (activeTab === 'Plants' && e.type === 'Plant'));
+    ? entitiesList 
+    : entitiesList.filter(e => e.type === activeTab || (activeTab === 'Materials' && e.type === 'Material') || (activeTab === 'Plants' && e.type === 'Plant'));
 
   const getIcon = (type: EntityType) => {
     switch (type) {
@@ -65,11 +83,11 @@ export function AffectedEntitiesTab({ disruptionData }: { disruptionData: any })
       {/* Top Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: 'Suppliers', count: 1, icon: Truck, color: 'text-purple-500' },
-          { label: 'Materials', count: 2, icon: Box, color: 'text-blue-500' },
-          { label: 'Plants', count: 5, icon: Factory, color: 'text-indigo-500' },
-          { label: 'Products', count: 8, icon: Package, color: 'text-emerald-500' },
-          { label: 'Customers', count: 14, icon: Users, color: 'text-amber-500' },
+          { label: 'Suppliers', count: entitiesList.filter(e => e.type === 'Supplier').length, icon: Truck, color: 'text-purple-500' },
+          { label: 'Materials', count: entitiesList.filter(e => e.type === 'Material').length, icon: Box, color: 'text-blue-500' },
+          { label: 'Plants', count: entitiesList.filter(e => e.type === 'Plant').length, icon: Factory, color: 'text-indigo-500' },
+          { label: 'Products', count: entitiesList.filter(e => e.type === 'Product').length, icon: Package, color: 'text-emerald-500' },
+          { label: 'Customers', count: entitiesList.filter(e => e.type === 'Customer').length, icon: Users, color: 'text-amber-500' },
         ].map((m, i) => (
           <div key={i} className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex items-center justify-between cursor-pointer hover:border-slate-300 dark:hover:border-slate-600 transition-colors">
             <div>

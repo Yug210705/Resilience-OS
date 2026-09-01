@@ -30,7 +30,7 @@ MODEL_NAME = "google/gemma-4-31b-it:free"
 
 # SAP Cache for resilience
 sap_cache: Dict[str, dict] = {}
-sap_adapter = MockSAPAdapter()
+sap_adapter = RealSAPAdapter()
 
 class AuditLog(BaseModel):
     run_id: str

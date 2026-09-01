@@ -284,8 +284,8 @@ export function InventoryTab({ disruptionData, setActiveTab }: { disruptionData:
               <div className="flex items-center"><div className="w-3 h-0.5 bg-red-500 mr-2 border-t border-dashed"></div> Shortage Start</div>
             </div>
 
-            <div className="flex-1 w-full relative h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="flex-1 w-full relative min-h-[300px]">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <LineChart data={activeData.chartData} margin={{ top: 10, right: 30, left: -20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.5} />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={15} />
@@ -417,7 +417,7 @@ export function InventoryTab({ disruptionData, setActiveTab }: { disruptionData:
               </div>
             ))}
           </div>
-          <button className="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline mt-3">+{Math.floor(Math.random() * 10) + 2} more products</button>
+          <button className="text-indigo-600 dark:text-indigo-400 text-xs font-bold hover:underline mt-3">+4 more products</button>
         </div>
         
         <div className="space-y-3 mt-auto pt-4 border-t border-slate-200 dark:border-slate-800">

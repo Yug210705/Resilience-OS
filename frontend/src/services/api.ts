@@ -134,3 +134,19 @@ export async function updateRecoveryPlanStatus(planId: string, status: string) {
   if (!res.ok) throw new Error("Failed to update status");
   return res.json();
 }
+export async function runRecoveryPipeline(materialId: string) {
+  const res = await fetch(`${AI_API_URL}/run-recovery?material_id=${encodeURIComponent(materialId)}`, {
+    method: 'POST'
+  });
+  if (!res.ok) {
+    let errorDetail = "Unknown error";
+    try {
+      const errJson = await res.json();
+      errorDetail = errJson.detail || JSON.stringify(errJson);
+    } catch(e) {
+      errorDetail = await res.text();
+    }
+    throw new Error(`AI Pipeline Error: ${errorDetail}`);
+  }
+  return res.json();
+}

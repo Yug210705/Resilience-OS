@@ -73,16 +73,10 @@ export function Sidebar() {
             href: '/recovery-plans'
           };
         }
-        if (item.name === 'Approvals') {
+        if (item.name === 'Approvals' || item.name === 'Risk & Audit') {
           return {
             ...item,
-            href: activeDisruption ? `/approvals/${activeDisruption.simulation_id}` : '/command-center'
-          };
-        }
-        if (item.name === 'Risk & Audit') {
-          return {
-            ...item,
-            href: activeDisruption ? `/risk/${activeDisruption.simulation_id}` : '/command-center'
+            href: '/recovery-plans'
           };
         }
         return item;

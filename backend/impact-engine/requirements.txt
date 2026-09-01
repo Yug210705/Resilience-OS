@@ -6,3 +6,5 @@ networkx
 scipy
 pytest
 httpx
+hdbcli
+sqlalchemy-hana

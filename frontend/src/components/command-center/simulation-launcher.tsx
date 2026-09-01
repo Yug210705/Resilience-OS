@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 export function SimulationLauncher({ children }: { children?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPitchMode, setIsPitchMode] = useState(true);
+  const [isPitchMode, setIsPitchMode] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const { setActiveDisruption } = useSimulationStore();
   const router = useRouter();
@@ -66,8 +66,8 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
       setActiveDisruption(result);
       setIsOpen(false);
       
-      // Always route to the beautiful Disruption Impact Analysis page
-      router.push(`/disruptions/${result.simulation_id}`);
+      // Removed automatic routing so the user stays on the Overview page
+      // router.push(`/disruptions/${result.simulation_id}`);
     } catch (e: any) {
       console.error(e);
       setErrorMsg(e.message || "Failed to simulate. Ensure backend is running and entity ID is correct.");
@@ -107,25 +107,7 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
             </div>
             
             <div className="p-6 space-y-5 relative">
-              {/* Pitch Mode Toggle */}
-              {!isLoading && (
-                <div className="flex items-center justify-between p-3 mb-2 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-lg">
-                  <div className="flex items-center">
-                    <Presentation className="w-5 h-5 text-indigo-600 mr-2" />
-                    <div>
-                      <h4 className="text-sm font-bold text-indigo-900">SAP Hackfest Presentation Mode</h4>
-                      <p className="text-xs text-indigo-700">Matches Slide 8 data exactly</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setIsPitchMode(!isPitchMode)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isPitchMode ? 'bg-indigo-600' : 'bg-slate-300'}`}
-                  >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPitchMode ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-              )}
-
+              {/* Pitch Mode Toggle removed to enforce real API usage */}
               {isLoading ? (
                 <div className="py-12 flex flex-col items-center justify-center space-y-6">
                   <div className="relative">
@@ -140,7 +122,7 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                   </div>
                 </div>
               ) : (
-                <div className={`transition-opacity duration-300 ${isPitchMode ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                <div className={`transition-opacity duration-300 opacity-100`}>
                   {errorMsg && (
                     <div className="mb-4 p-3 bg-red-50 text-red-600 text-sm font-semibold rounded-lg border border-red-100 flex items-center">
                       <AlertTriangle className="w-4 h-4 mr-2 shrink-0" />
@@ -152,8 +134,15 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                       <label className="block text-sm font-semibold text-slate-700 mb-1">Disruption Type</label>
                       <select 
                         className="w-full border border-slate-300 rounded-md p-2.5 text-slate-900 bg-white focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={isPitchMode ? 'supplier' : formData.disruption_type}
-                        onChange={(e) => setFormData({...formData, disruption_type: e.target.value})}
+                        value={formData.disruption_type}
+                        onChange={(e) => {
+                          const type = e.target.value;
+                          let newEntity = formData.affected_entity_id;
+                          if (type === 'supplier') newEntity = 'SUP-007';
+                          if (type === 'material') newEntity = 'MAT-004';
+                          if (type === 'plant') newEntity = 'PLANT-002';
+                          setFormData({...formData, disruption_type: type, affected_entity_id: newEntity});
+                        }}
                       >
                         <option value="supplier">Supplier</option>
                         <option value="material">Material</option>
@@ -165,7 +154,7 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                       <input 
                         type="text" 
                         className="w-full border border-slate-300 rounded-md p-2.5 text-slate-900 font-mono text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                        value={isPitchMode ? 'S47' : formData.affected_entity_id}
+                        value={formData.affected_entity_id}
                         onChange={(e) => setFormData({...formData, affected_entity_id: e.target.value})}
                       />
                     </div>
@@ -175,8 +164,8 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                         <input 
                           type="number" step="0.1" min="0" max="1"
                           className="w-full border border-slate-300 rounded-md p-2.5 text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={isPitchMode ? 1.0 : formData.severity}
-                          onChange={(e) => setFormData({...formData, severity: parseFloat(e.target.value)})}
+                          value={Number.isNaN(formData.severity) ? '' : formData.severity}
+                          onChange={(e) => setFormData({...formData, severity: e.target.value === '' ? NaN : parseFloat(e.target.value)})}
                         />
                       </div>
                       <div>
@@ -184,8 +173,8 @@ export function SimulationLauncher({ children }: { children?: React.ReactNode })
                         <input 
                           type="number" min="1"
                           className="w-full border border-slate-300 rounded-md p-2.5 text-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
-                          value={isPitchMode ? 10 : formData.duration_days}
-                          onChange={(e) => setFormData({...formData, duration_days: parseInt(e.target.value)})}
+                          value={Number.isNaN(formData.duration_days) ? '' : formData.duration_days}
+                          onChange={(e) => setFormData({...formData, duration_days: e.target.value === '' ? NaN : parseInt(e.target.value)})}
                         />
                       </div>
                     </div>

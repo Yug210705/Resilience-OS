@@ -1,5 +1,7 @@
 fastapi
 uvicorn
+hdbcli
+sqlalchemy-hana
 pydantic
 pydantic-settings
 anthropic

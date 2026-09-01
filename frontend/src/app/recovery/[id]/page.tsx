@@ -75,6 +75,7 @@ export default function RecoveryPage({ params }: { params: Promise<{ id: string 
 
   if (!activeDisruption) return null;
 
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-end border-b border-slate-200 pb-4 mt-6">

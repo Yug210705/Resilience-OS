@@ -105,7 +105,15 @@ export function OrdersTab({ disruptionData }: { disruptionData: any }) {
                     <td className="py-4 px-4 text-xs font-medium text-slate-600 dark:text-slate-400">{o.prod}</td>
                     <td className="py-4 px-4 text-right font-black text-slate-900 dark:text-white">{o.val}</td>
                     <td className="py-4 px-4 text-center">
-                      <span className="text-red-600 dark:text-red-400 font-bold bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded text-xs">+{o.delay}</span>
+                      <div className={cn(
+                        "inline-flex items-center px-2 py-1 rounded-md border text-[11px] font-bold whitespace-nowrap shadow-sm",
+                        o.sla === 'Breached' ? "bg-red-50/50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400" :
+                        o.sla === 'At Risk' ? "bg-amber-50/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400" :
+                        "bg-emerald-50/50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-400"
+                      )}>
+                        <Clock className="w-3 h-3 mr-1.5 opacity-80" />
+                        +{o.delay}
+                      </div>
                     </td>
                     <td className="py-4 px-4 text-center">
                       <span className={cn(
@@ -135,7 +143,7 @@ export function OrdersTab({ disruptionData }: { disruptionData: any }) {
           <div className="bg-white dark:bg-[#111827] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-sm flex-1 flex flex-col min-h-[400px]">
             <h3 className="font-bold text-[15px] mb-6">Revenue at Risk by Customer</h3>
             <div className="flex-1 w-full min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                 <BarChart data={customerImpactData} layout="vertical" margin={{ top: 0, right: 20, left: 20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#334155" strokeOpacity={0.15} />
                   <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `₹${val}Cr`} />

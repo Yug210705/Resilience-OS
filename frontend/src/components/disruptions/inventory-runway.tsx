@@ -26,7 +26,7 @@ export function InventoryRunway() {
         <p className="text-xs text-slate-500">Buffer depletion over time</p>
       </div>
       <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
           <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="colorInv" x1="0" y1="0" x2="0" y2="1">

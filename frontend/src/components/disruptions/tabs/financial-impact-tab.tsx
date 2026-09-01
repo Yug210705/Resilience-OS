@@ -66,7 +66,7 @@ export function FinancialImpactTab({ disruptionData }: { disruptionData: any }) 
           </div>
           
           <div className="flex-1 w-full min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <AreaChart data={financialData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorLoss" x1="0" y1="0" x2="0" y2="1">
@@ -156,7 +156,13 @@ export function FinancialImpactTab({ disruptionData }: { disruptionData: any }) 
             
           </div>
           
-          <button className="w-full mt-auto bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 font-bold py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 text-sm">
+          <button 
+            onClick={async () => {
+              const { generateFinancialReport } = await import('@/lib/pdf-generator');
+              generateFinancialReport('DIS-7901');
+            }}
+            className="w-full mt-auto bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-700 text-blue-600 dark:text-blue-400 font-bold py-3 rounded-lg flex items-center justify-center transition-colors shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 text-sm"
+          >
             Download Financial Report (PDF)
           </button>
         </div>

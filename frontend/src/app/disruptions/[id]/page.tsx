@@ -43,7 +43,7 @@ export default function ImpactAnalysisPage() {
 
   return (
     <div className="flex flex-col h-full bg-slate-50 dark:bg-[#0A0F1C] overflow-y-auto overflow-x-hidden custom-scrollbar">
-      <div className="max-w-[1600px] mx-auto w-full">
+      <div className="max-w-[1800px] mx-auto w-full">
         {/* Header Area */}
         <div className="px-6 pt-4 shrink-0">
           <div className="mb-6 flex justify-between items-end">
