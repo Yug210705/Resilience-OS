@@ -9,9 +9,6 @@ from app.database import engine, Base, get_db
 from app.models.db_models import RecoveryPlanRecord
 from app.models.schemas import CreateRecoveryPlanRequest, RecoveryPlanResponse, UpdateStatusRequest
 from app.services.orchestrator import run_recovery_pipeline, AuditLog, get_recovery_plans, RecoveryPlansResponse
-from app.api.events import router as events_router, broadcast_event
-from app.api.webhooks import router as webhooks_router
-import asyncio
 
 # Initialize database
 Base.metadata.create_all(bind=engine)
@@ -22,19 +19,11 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.include_router(events_router, prefix="/api/sap/events", tags=["SAP Event Mesh"])
-app.include_router(webhooks_router, prefix="/api/sap/webhooks", tags=["SAP Event Mesh Webhooks"])
-
-@app.on_event("startup")
-async def startup_event():
-    # Application startup logic (removed simulation)
-    pass
 
 @app.get("/api/recovery/options", response_model=RecoveryPlansResponse, summary="Get Recovery Options", description="Generates deterministic recovery options based on SAP supply data.")
 async def api_get_recovery_options(material_id: str = "MAT-12"):
@@ -142,16 +131,6 @@ async def api_update_plan_status(plan_id: str, req: UpdateStatusRequest, db: Ses
     plan.status = req.status
     db.commit()
     db.refresh(plan)
-    
-    # Broadcast status change to SAP Event Mesh listeners
-    broadcast_event("SAP_BAPI_EVENT", {
-        "source": "SAP_BTP_DESTINATION",
-        "action": "PurchaseOrderUpdate",
-        "plan_id": plan.id,
-        "status": plan.status,
-        "message": f"SAP BAPI executed: PO status updated to {plan.status}"
-    })
-    
     return RecoveryPlanResponse(
         id=plan.id,
         disruption_id=plan.disruption_id,

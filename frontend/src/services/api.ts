@@ -35,10 +35,7 @@ const AI_API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'http://127.0.0.1:8001'
 
 // For the Disruption -> Recovery Options page
 export async function fetchRecoveryOptions(materialId: string) {
-  const ts = new Date().getTime();
-  const res = await fetch(`${AI_API_URL}/api/recovery/options?material_id=${encodeURIComponent(materialId)}&_t=${ts}`, {
-    cache: 'no-store'
-  });
+  const res = await fetch(`${AI_API_URL}/api/recovery/options?material_id=${encodeURIComponent(materialId)}`);
   if (!res.ok) {
     let errorDetail = "Unknown error";
     try {
@@ -96,8 +93,7 @@ export interface RecoveryPlan {
 
 // Fetch all persisted plans for the Workspace
 export async function fetchPersistedRecoveryPlans(): Promise<RecoveryPlan[]> {
-  const ts = new Date().getTime();
-  const res = await fetch(`${AI_API_URL}/api/recovery/plans?_t=${ts}`, { cache: 'no-store' });
+  const res = await fetch(`${AI_API_URL}/api/recovery/plans`);
   if (!res.ok) throw new Error("Failed to fetch recovery plans");
   const data = await res.json();
   
