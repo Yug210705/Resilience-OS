@@ -12,7 +12,16 @@ export async function simulateDisruption(payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Failed to simulate disruption");
+  if (!res.ok) {
+    let errorDetail = "Unknown error";
+    try {
+      const errJson = await res.json();
+      errorDetail = errJson.detail || JSON.stringify(errJson);
+    } catch(e) {
+      errorDetail = await res.text();
+    }
+    throw new Error(`Failed to simulate disruption: ${errorDetail}`);
+  }
   return res.json();
 }
 

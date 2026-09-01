@@ -5,7 +5,7 @@ import { useSimulationStore } from '@/stores/useSimulationStore';
 import { simulateDisruption } from '@/services/api';
 import { useRouter } from 'next/navigation';
 
-export function SimulationLauncher() {
+export function SimulationLauncher({ children }: { children?: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isPitchMode, setIsPitchMode] = useState(true);
@@ -21,28 +21,29 @@ export function SimulationLauncher() {
 
   const getPitchModeData = () => {
     return {
-      simulation_id: "DEMO-S47-HACKFEST",
+      simulation_id: "SIM-2025-05-17-001",
       disruption: {
-        disruption_type: "supplier",
-        affected_entity_id: "S47",
+        disruption_type: "Supplier Capacity Disruption",
+        affected_entity_id: "SUP-007",
         severity: 1.0,
         duration_days: 10
       },
       summary: {
-        affected_suppliers: 17,
-        affected_materials: 24,
-        affected_plants: 3,
-        affected_products: 12,
-        affected_orders: 43,
-        revenue_at_risk: 38000000, // 3.8 Cr
+        affected_suppliers: 7,
+        affected_materials: 3,
+        affected_plants: 4,
+        affected_products: 8,
+        affected_orders: 124,
+        revenue_at_risk: 185000000, // 18.5 Cr
         overall_impact_score: 94
       },
-      affected_materials: [{ id: "RESIN-X" }, { id: "COAT-Y" }],
-      affected_plants: [{ id: "PLANT-01" }, { id: "PLANT-02" }],
-      affected_orders: [{ order_id: "ORD-US-DIST" }, { order_id: "ORD-EU-OEM" }],
+      affected_materials: [{ id: "MAT-004", risk_score: 1.0 }, { id: "MAT-006", risk_score: 0.6 }, { id: "MAT-009", risk_score: 0.3 }],
+      affected_plants: [{ id: "PLANT-002", risk_score: 1.0 }, { id: "PLANT-003", risk_score: 0.6 }, { id: "PLANT-005", risk_score: 0.3 }],
+      affected_products: [{ id: "PRD-008", risk_score: 1.0 }, { id: "PRD-003", risk_score: 0.6 }, { id: "PRD-010", risk_score: 0.3 }],
+      affected_orders: [{ order_id: "ORD-1042", risk_score: 1.0 }, { order_id: "ORD-1043", risk_score: 0.6 }, { order_id: "ORD-1044", risk_score: 0.3 }],
       recovery_context: {
         supplier_options: [], // Will be handled by the Live Demo component fallback
-        material_shortages: [{ material_id: "RESIN-X", normal_demand_per_day: 100 }]
+        material_shortages: [{ material_id: "MAT-004", normal_demand_per_day: 420 }]
       },
       timeline: [] // Simplified for demo
     };
@@ -63,12 +64,8 @@ export function SimulationLauncher() {
       setActiveDisruption(result);
       setIsOpen(false);
       
-      // Auto-route to the Live Demo (Slide 8) if in Pitch Mode
-      if (isPitchMode) {
-        router.push(`/live-demo/${result.simulation_id}`);
-      } else {
-        router.push(`/disruptions/${result.simulation_id}`);
-      }
+      // Always route to the beautiful Disruption Impact Analysis page
+      router.push(`/disruptions/${result.simulation_id}`);
     } catch (e) {
       console.error(e);
       alert("Failed to simulate. Ensure backend is running.");
@@ -79,14 +76,20 @@ export function SimulationLauncher() {
 
   return (
     <>
-      <button 
-        onClick={() => setIsOpen(true)}
-        className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-md font-semibold text-sm shadow-lg flex items-center transition-all hover:scale-105 active:scale-95 group relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-        <AlertTriangle className="w-4 h-4 mr-2 relative z-10" />
-        <span className="relative z-10">Simulate Disruption</span>
-      </button>
+      {children ? (
+        <div onClick={() => setIsOpen(true)} className="h-full cursor-pointer flex items-center">
+          {children}
+        </div>
+      ) : (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-md font-semibold text-sm shadow-lg flex items-center transition-all hover:scale-105 active:scale-95 group relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+          <AlertTriangle className="w-4 h-4 mr-2 relative z-10" />
+          <span className="relative z-10">Simulate Disruption</span>
+        </button>
+      )}
 
       {isOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

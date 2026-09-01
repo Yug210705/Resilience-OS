@@ -1,12 +1,13 @@
 'use client';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, use } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight, ShieldCheck, TrendingDown, Clock, PackageCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
-export default function RecoveryPage({ params }: { params: { id: string } }) {
+export default function RecoveryPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { activeDisruption } = useSimulationStore();
   const router = useRouter();
 
@@ -19,16 +20,21 @@ export default function RecoveryPage({ params }: { params: { id: string } }) {
   const options = activeDisruption.recovery_context?.supplier_options || [];
   
   // Dummy generate plans based on options
-  const plans = options.map((opt: any, i: number) => ({
-    id: `PLAN-${i+1}`,
-    name: `Activate ${opt.supplier_id}`,
-    supplier: opt.supplier_id,
-    time: opt.lead_time_days,
-    costIncrease: ((opt.unit_cost - 50) / 50 * 100).toFixed(1), // Fake baseline
-    recovered: Math.min(100, Math.round((opt.capacity_per_day / activeDisruption.recovery_context.material_shortages[0]?.normal_demand_per_day) * 100)),
-    risk: opt.risk_score < 30 ? 'LOW' : opt.risk_score < 60 ? 'MEDIUM' : 'HIGH',
-    recommended: i === 0
-  }));
+  const plans = options.map((opt: any, i: number) => {
+    const demand = activeDisruption.recovery_context?.material_shortages?.[0]?.normal_demand_per_day || 1000;
+    const recoveredPct = Math.min(100, Math.round((opt.capacity_per_day / demand) * 100)) || 85;
+    
+    return {
+      id: `PLAN-${i+1}`,
+      name: `Activate ${opt.supplier_id}`,
+      supplier: opt.supplier_id,
+      time: opt.lead_time_days,
+      costIncrease: ((opt.unit_cost - 50) / 50 * 100).toFixed(1), // Fake baseline
+      recovered: recoveredPct,
+      risk: opt.risk_score < 30 ? 'LOW' : opt.risk_score < 60 ? 'MEDIUM' : 'HIGH',
+      recommended: i === 0
+    };
+  });
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
@@ -37,7 +43,7 @@ export default function RecoveryPage({ params }: { params: { id: string } }) {
           <div className="flex items-center space-x-2 text-sm text-slate-500 mb-2">
             <Link href="/command-center" className="hover:text-slate-900 transition-colors">Command Center</Link>
             <span>/</span>
-            <Link href={`/disruptions/${params.id}`} className="hover:text-slate-900 transition-colors">{params.id}</Link>
+            <Link href={`/disruptions/${id}`} className="hover:text-slate-900 transition-colors">{id}</Link>
             <span>/</span>
             <span className="font-semibold text-slate-900">Recovery Options</span>
           </div>
@@ -79,7 +85,7 @@ export default function RecoveryPage({ params }: { params: { id: string } }) {
               
               <div className="mt-8">
                 <Link 
-                  href={`/risk/${params.id}?plan=${plan.id}&supplier=${plan.supplier}`}
+                  href={`/risk/${id}?plan=${plan.id}&supplier=${plan.supplier}`}
                   className={`w-full flex justify-center items-center py-2.5 rounded-md font-semibold text-sm transition-colors ${plan.recommended ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}`}
                 >
                   Audit Risk & Approve <ArrowRight className="w-4 h-4 ml-2" />

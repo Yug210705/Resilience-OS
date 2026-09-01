@@ -1,6 +1,6 @@
 'use client';
 import { useSimulationStore } from '@/stores/useSimulationStore';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Zap, BarChart2, Target, Bot, CheckSquare, ArrowRight, Lightbulb } from 'lucide-react';
@@ -8,7 +8,9 @@ import { formatCurrency } from '@/lib/utils';
 
 import { CountUp } from '@/components/ui/count-up';
 
-export default function LiveDemoPage({ params }: { params: { id: string } }) {
+export default function LiveDemoPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const { activeDisruption } = useSimulationStore();
   const router = useRouter();
 
@@ -150,7 +152,7 @@ export default function LiveDemoPage({ params }: { params: { id: string } }) {
           
           <div className="mt-8">
             <Link 
-              href={`/risk/${params.id}?plan=${bestPlan.id}&supplier=${bestPlan.supplier}`}
+              href={`/risk/${id}?plan=${bestPlan.id}&supplier=${bestPlan.supplier}`}
               className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold py-3.5 rounded-lg shadow-lg flex justify-center items-center transition-colors uppercase tracking-wide text-sm"
             >
               <Lightbulb className="w-5 h-5 mr-2" /> Explore "Why {bestPlan.id}?"

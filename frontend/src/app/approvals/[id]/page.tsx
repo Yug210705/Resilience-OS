@@ -1,12 +1,12 @@
 'use client';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use, Suspense } from 'react';
 import Link from 'next/link';
 import { Check, X, FileCode2, ArrowRight } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 
-function PageContent({ params }: { params: { id: string } }) {
+function PageContent({ id }: { id: string }) {
   const { activeDisruption } = useSimulationStore();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -32,7 +32,7 @@ function PageContent({ params }: { params: { id: string } }) {
   const handleApprove = () => {
     setApproved(true);
     setTimeout(() => {
-      router.push(`/sap-actions?sim=${params.id}`);
+      router.push(`/sap-actions?sim=${id}`);
     }, 1500);
   };
 
@@ -110,10 +110,11 @@ function PageContent({ params }: { params: { id: string } }) {
 }
 
 
-export default function Page(props: { params: { id: string } }) {
+export default function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   return (
     <Suspense fallback={<div className="p-12 text-center">Loading...</div>}>
-      <PageContent params={props.params} />
+      <PageContent id={id} />
     </Suspense>
   );
 }
