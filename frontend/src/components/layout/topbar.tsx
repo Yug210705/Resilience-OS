@@ -4,9 +4,12 @@ import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useSimulationStore } from '@/stores/useSimulationStore';
 
+import { useSapEvents } from '@/components/providers/sap-event-provider';
+
 export function Topbar() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { isConnected } = useSapEvents();
   
   const [showNotifications, setShowNotifications] = useState(false);
   const [showEnv, setShowEnv] = useState(false);
@@ -62,18 +65,32 @@ export function Topbar() {
       </div>
       
       <div className="flex items-center space-x-5 text-sm">
-        {/* Status */}
-        {activeDisruption ? (
-          <div className="flex items-center text-red-600 dark:text-red-500 font-semibold text-xs tracking-wide">
-            <div className="w-2 h-2 rounded-full bg-red-500 mr-2 shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse"></div>
-            System Disrupted
-          </div>
-        ) : (
-          <div className="flex items-center text-emerald-600 dark:text-emerald-500 font-semibold text-xs tracking-wide">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
-            Operational
-          </div>
-        )}
+        {/* SAP Event Mesh & System Status */}
+        <div className="flex items-center space-x-3">
+          {isConnected ? (
+            <div className="flex items-center bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50 px-2.5 py-1 rounded-full text-xs font-semibold">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></div>
+              SAP Event Mesh: Live
+            </div>
+          ) : (
+            <div className="flex items-center bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 px-2.5 py-1 rounded-full text-xs font-semibold">
+              <div className="w-2 h-2 rounded-full bg-slate-400 mr-2"></div>
+              SAP Event Mesh: Reconnecting...
+            </div>
+          )}
+
+          {activeDisruption ? (
+            <div className="flex items-center text-red-600 dark:text-red-500 font-semibold text-xs tracking-wide">
+              <div className="w-2 h-2 rounded-full bg-red-500 mr-2 shadow-[0_0_8px_rgba(239,68,68,0.5)] animate-pulse"></div>
+              System Disrupted
+            </div>
+          ) : (
+            <div className="flex items-center text-emerald-600 dark:text-emerald-500 font-semibold text-xs tracking-wide">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-2 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+              Operational
+            </div>
+          )}
+        </div>
         
         {/* Actions */}
         <div className="flex items-center space-x-3 border-l border-slate-200 dark:border-slate-800 pl-5">

@@ -6,8 +6,11 @@ import { Check, X, FileCode2, ArrowRight, AlertCircle, ShieldCheck } from 'lucid
 import { formatCurrency } from '@/lib/utils';
 import { fetchRecoveryPlan, updateRecoveryPlanStatus } from '@/services/api';
 
+import { useSapEvents } from '@/components/providers/sap-event-provider';
+
 function PageContent({ id }: { id: string }) {
   const router = useRouter();
+  const { triggerBapiToast } = useSapEvents();
   
   const [plan, setPlan] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +34,7 @@ function PageContent({ id }: { id: string }) {
       setApproved(true);
       setTimeout(() => {
         router.push(`/recovery-plans`);
-      }, 1000);
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setUpdating(false);

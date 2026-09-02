@@ -29,29 +29,33 @@ function PageContent({ id }: { id: string }) {
 
   useEffect(() => {
     if (plan) {
-      const materialId = activeDisruption?.recovery_context?.material_shortages?.[0]?.material_id;
-      if (materialId) {
-        runRecoveryPipeline(materialId)
-          .then(auditLog => {
-            setLlmExplanation(auditLog.llm_explanation);
-            setAgenticRetries(auditLog.agentic_retries);
-            setAnalyzing(false);
-          })
-          .catch(err => {
-            // Fallback to fake if AI is down
-            console.error(err);
-            setTimeout(() => setAnalyzing(false), 1500);
-          });
-      } else {
-        const timer = setTimeout(() => setAnalyzing(false), 2500);
-        return () => clearTimeout(timer);
-      }
+      const materialId = activeDisruption?.recovery_context?.material_shortages?.[0]?.material_id || 'MAT-12';
+      runRecoveryPipeline(materialId)
+        .then(auditLog => {
+          setLlmExplanation(auditLog.llm_explanation);
+          setAgenticRetries(auditLog.agentic_retries);
+          setAnalyzing(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setTimeout(() => setAnalyzing(false), 1500);
+        });
+    } else {
+      const timer = setTimeout(() => setAnalyzing(false), 2500);
+      return () => clearTimeout(timer);
     }
   }, [plan, activeDisruption]);
 
   const handleProceed = async () => {
     if (updating) return;
     setUpdating(true);
+    
+    // If already past PENDING_AUDIT, just route to the next page without re-updating
+    if (plan.status !== 'PENDING_AUDIT') {
+      router.push(`/approvals/${id}`);
+      return;
+    }
+    
     try {
       await updateRecoveryPlanStatus(id, 'PENDING_APPROVAL');
       router.push(`/approvals/${id}`);
@@ -199,7 +203,7 @@ function PageContent({ id }: { id: string }) {
                 disabled={updating}
                 className="bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white px-8 py-3.5 rounded-lg text-sm font-bold shadow-sm shadow-blue-500/20 flex items-center transition-all hover:pr-6 group"
               >
-                {updating ? 'Updating Status...' : 'Proceed to Approval'} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                {updating ? 'Processing...' : (plan.status !== 'PENDING_AUDIT' ? 'View Approval Status' : 'Proceed to Approval')} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>
