@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { BarChart2, Users, Building2, LayoutDashboard, ListChecks, AlertTriangle, Info, Maximize, FileText, ArrowRight, Factory, LayoutGrid, Timer, MapPin } from 'lucide-react';
+import { BarChart2, Users, Building2, LayoutDashboard, ListChecks, AlertTriangle, Info, Maximize, FileText, ArrowRight, Factory, LayoutGrid, Timer, MapPin, Clock } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ReferenceLine, ReferenceArea, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -184,8 +184,8 @@ export function ImpactOverviewTab({ disruptionData, setActiveTab }: { disruption
             </div>
           </div>
           
-          <div className="flex-1 w-full relative h-[180px] p-4 bg-slate-50/50 dark:bg-[#0A0F1C]/30 rounded-b-xl">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="flex-1 w-full relative min-h-[180px] p-4 bg-slate-50/50 dark:bg-[#0A0F1C]/30 rounded-b-xl">
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
               <LineChart data={inventoryData} margin={{ top: 20, right: 10, left: -25, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" strokeOpacity={0.6} />
                 <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
@@ -242,7 +242,7 @@ export function ImpactOverviewTab({ disruptionData, setActiveTab }: { disruption
               
               <div className="w-36 flex flex-col items-center justify-center relative pl-6 border-l border-slate-100 dark:border-slate-800/60 ml-6">
                 <div className="w-20 h-20 relative">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                     <PieChart>
                       <Pie
                         data={[{ value: 57.5, fill: '#3b82f6' }, { value: 42.5, fill: '#ef4444' }]}
@@ -310,12 +310,14 @@ export function ImpactOverviewTab({ disruptionData, setActiveTab }: { disruption
                      <td className="py-3 pl-5 font-bold text-slate-900 dark:text-slate-200">{o.id}</td>
                      <td className="py-3 font-semibold text-slate-600 dark:text-slate-400 truncate max-w-[90px]">{o.customer}</td>
                      <td className="py-3 text-center">
-                        <span className={cn(
-                          "px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider",
-                          o.critical ? "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50" : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/50"
+                        <div className={cn(
+                          "inline-flex items-center px-2 py-1 rounded-md border text-[11px] font-bold whitespace-nowrap shadow-sm",
+                          o.critical ? "bg-red-50/50 dark:bg-red-900/20 border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-400" : 
+                          "bg-amber-50/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800/50 text-amber-700 dark:text-amber-400"
                         )}>
-                          {o.delay}
-                        </span>
+                          <Clock className="w-3 h-3 mr-1.5 opacity-80" />
+                          +{o.delay}
+                        </div>
                      </td>
                      <td className="py-3 pr-5 font-black text-slate-900 dark:text-white text-right group-hover/row:text-blue-600 dark:group-hover/row:text-blue-400 transition-colors">{o.rev}</td>
                    </tr>

@@ -9,6 +9,8 @@ from app.database import engine, Base, get_db
 from app.models.db_models import RecoveryPlanRecord
 from app.models.schemas import CreateRecoveryPlanRequest, RecoveryPlanResponse, UpdateStatusRequest, RecoveryPlanListResponse
 from app.services.orchestrator import run_recovery_pipeline, AuditLog, get_recovery_plans, RecoveryPlansResponse
+from app.api.events import router as events_router, broadcast_event
+from app.api.webhooks import router as webhooks_router
 
 # Initialize database
 Base.metadata.create_all(bind=engine)
@@ -24,6 +26,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(events_router, prefix="/api/sap/events", tags=["SAP Event Mesh"])
+app.include_router(webhooks_router, prefix="/api/sap/webhooks", tags=["SAP Event Mesh Webhooks"])
 
 @app.get("/api/recovery/options", response_model=RecoveryPlansResponse, summary="Get Recovery Options", description="Generates deterministic recovery options based on SAP supply data.")
 async def api_get_recovery_options(material_id: str = "MAT-12"):
@@ -229,7 +234,7 @@ async def api_update_plan_status(plan_id: str, req: UpdateStatusRequest, db: Ses
         
     # State Machine Rules
     valid_transitions = {
-        "PENDING_AUDIT": ["PENDING_APPROVAL", "REJECTED"],
+        "PENDING_AUDIT": ["PENDING_APPROVAL", "APPROVED", "REJECTED"],
         "PENDING_APPROVAL": ["APPROVED", "REJECTED"],
         "APPROVED": ["COMPLETED", "REJECTED"],
         "COMPLETED": [],
@@ -246,6 +251,21 @@ async def api_update_plan_status(plan_id: str, req: UpdateStatusRequest, db: Ses
     plan.status = req.status
     db.commit()
     db.refresh(plan)
+    
+    # Execute SAP BAPI / CAP Purchase Order creation when plan is APPROVED
+    if req.status == "APPROVED":
+        try:
+            from app.services.orchestrator import execute_sap_action
+            plan_data = plan.details or {
+                "id": plan.id,
+                "disruption_id": plan.disruption_id,
+                "supplier_id": plan.supplier_id,
+                "total_cost": plan.total_cost
+            }
+            await execute_sap_action(plan_data)
+        except Exception as e_bapi:
+            from app.services.orchestrator import logger
+            logger.error("Failed to execute BAPI on plan approval", error=str(e_bapi))
     return RecoveryPlanResponse(
         id=plan.id,
         disruption_id=plan.disruption_id,

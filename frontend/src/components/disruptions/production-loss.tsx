@@ -23,7 +23,7 @@ export function ProductionLoss() {
         <p className="text-xs text-slate-500">Daily unfulfilled manufacturing units</p>
       </div>
       <div className="h-64">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
             <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />

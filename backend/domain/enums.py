@@ -1,0 +1,37 @@
+from enum import Enum
+
+class EntityStatus(str, Enum):
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    DISRUPTED = "DISRUPTED"
+
+class DisruptionType(str, Enum):
+    SUPPLIER_FAILURE = "SUPPLIER_FAILURE"
+    ROUTE_DELAY = "ROUTE_DELAY"
+    PLANT_SHUTDOWN = "PLANT_SHUTDOWN"
+    MATERIAL_SHORTAGE = "MATERIAL_SHORTAGE"
+    DEMAND_SPIKE = "DEMAND_SPIKE"
+
+class DisruptionSeverity(str, Enum):
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
+
+class OrderStatus(str, Enum):
+    PENDING = "PENDING"
+    IN_TRANSIT = "IN_TRANSIT"
+    DELIVERED = "DELIVERED"
+    DELAYED = "DELAYED"
+    AT_RISK = "AT_RISK"
+
+class PlanStatus(str, Enum):
+    DRAFT = "DRAFT"
+    RECOMMENDED = "RECOMMENDED"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+class ActionType(str, Enum):
+    ALTERNATIVE_SUPPLIER = "ALTERNATIVE_SUPPLIER"
+    INVENTORY_REALLOCATION = "INVENTORY_REALLOCATION"
+    REROUTE = "REROUTE"

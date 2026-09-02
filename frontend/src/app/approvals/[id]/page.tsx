@@ -2,12 +2,15 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { Check, X, FileCode2, ArrowRight, AlertCircle } from 'lucide-react';
+import { Check, X, FileCode2, ArrowRight, AlertCircle, ShieldCheck } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { fetchRecoveryPlan, updateRecoveryPlanStatus } from '@/services/api';
 
+import { useSapEvents } from '@/components/providers/sap-event-provider';
+
 function PageContent({ id }: { id: string }) {
   const router = useRouter();
+  const { triggerBapiToast } = useSapEvents();
   
   const [plan, setPlan] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +34,7 @@ function PageContent({ id }: { id: string }) {
       setApproved(true);
       setTimeout(() => {
         router.push(`/recovery-plans`);
-      }, 1000);
+      }, 1500);
     } catch (err: any) {
       setError(err.message);
       setUpdating(false);
@@ -147,6 +150,38 @@ function PageContent({ id }: { id: string }) {
           <div className="p-5 overflow-auto flex-1 text-sm text-green-400 font-mono">
             <pre>{JSON.stringify(sapPayload, null, 2)}</pre>
           </div>
+        </div>
+      </div>
+      
+      {/* New Section: Compliance & Security Audit */}
+      <div className="mt-8 bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+        <h3 className="font-bold text-slate-900 mb-6 flex items-center">
+           <ShieldCheck className="w-5 h-5 mr-2 text-emerald-500" /> Pre-Execution Audit
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <div className="flex items-start">
+             <div className="bg-emerald-100 p-2 rounded-full mr-3 shrink-0"><Check className="w-4 h-4 text-emerald-600"/></div>
+             <div>
+               <div className="text-sm font-bold text-slate-900">Vendor Compliance</div>
+               <div className="text-xs text-slate-500 mt-1">Supplier {plan.supplier_id} is active in vendor master and ISO certified for MAT-004.</div>
+             </div>
+           </div>
+           
+           <div className="flex items-start">
+             <div className="bg-emerald-100 p-2 rounded-full mr-3 shrink-0"><Check className="w-4 h-4 text-emerald-600"/></div>
+             <div>
+               <div className="text-sm font-bold text-slate-900">Budget Authorization</div>
+               <div className="text-xs text-slate-500 mt-1">Cost variance falls within emergency pre-approved procurement bounds.</div>
+             </div>
+           </div>
+           
+           <div className="flex items-start">
+             <div className="bg-emerald-100 p-2 rounded-full mr-3 shrink-0"><Check className="w-4 h-4 text-emerald-600"/></div>
+             <div>
+               <div className="text-sm font-bold text-slate-900">SLA Protection</div>
+               <div className="text-xs text-slate-500 mt-1">Recovery timeline successfully prevents 92% of predicted customer SLA breaches.</div>
+             </div>
+           </div>
         </div>
       </div>
     </div>

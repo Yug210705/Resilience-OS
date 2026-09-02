@@ -15,12 +15,16 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   };
 }
 
+import { SapEventProvider } from '@/components/providers/sap-event-provider';
+
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <SapEventProvider>
+          {children}
+        </SapEventProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

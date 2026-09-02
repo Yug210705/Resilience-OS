@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import { fetchPersistedRecoveryPlans, updateRecoveryPlanStatus, RecoveryPlan, RecoveryPlanStatus, RecoveryPlanListResponse } from '@/services/api';
+import { useSapEvents } from '@/components/providers/sap-event-provider';
 
 function formatStatus(status: RecoveryPlanStatus): string {
   switch (status) {

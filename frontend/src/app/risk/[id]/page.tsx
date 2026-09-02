@@ -2,9 +2,10 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect, Suspense, use } from 'react';
 import Link from 'next/link';
-import { ShieldAlert, CheckCircle2, AlertCircle, ArrowRight, Activity, Sparkles } from 'lucide-react';
-import { fetchRecoveryPlan, updateRecoveryPlanStatus } from '@/services/api';
+import { ShieldAlert, CheckCircle2, AlertCircle, ArrowRight, Activity, Sparkles, ShieldCheck } from 'lucide-react';
+import { fetchRecoveryPlan, updateRecoveryPlanStatus, runRecoveryPipeline } from '@/services/api';
 import { formatCurrency } from '@/lib/utils';
+import { useSimulationStore } from '@/stores/useSimulationStore';
 
 function PageContent({ id }: { id: string }) {
   const router = useRouter();
@@ -13,6 +14,10 @@ function PageContent({ id }: { id: string }) {
   const [analyzing, setAnalyzing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState(false);
+  const [llmExplanation, setLlmExplanation] = useState<string | null>(null);
+  const [agenticRetries, setAgenticRetries] = useState(0);
+  
+  const { activeDisruption } = useSimulationStore();
 
   useEffect(() => {
     fetchRecoveryPlan(id)
@@ -24,16 +29,33 @@ function PageContent({ id }: { id: string }) {
 
   useEffect(() => {
     if (plan) {
-      const timer = setTimeout(() => {
-        setAnalyzing(false);
-      }, 2500);
+      const materialId = activeDisruption?.recovery_context?.material_shortages?.[0]?.material_id || 'MAT-12';
+      runRecoveryPipeline(materialId)
+        .then(auditLog => {
+          setLlmExplanation(auditLog.llm_explanation);
+          setAgenticRetries(auditLog.agentic_retries);
+          setAnalyzing(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setTimeout(() => setAnalyzing(false), 1500);
+        });
+    } else {
+      const timer = setTimeout(() => setAnalyzing(false), 2500);
       return () => clearTimeout(timer);
     }
-  }, [plan]);
+  }, [plan, activeDisruption]);
 
   const handleProceed = async () => {
     if (updating) return;
     setUpdating(true);
+    
+    // If already past PENDING_AUDIT, just route to the next page without re-updating
+    if (plan.status !== 'PENDING_AUDIT') {
+      router.push(`/approvals/${id}`);
+      return;
+    }
+    
     try {
       await updateRecoveryPlanStatus(id, 'PENDING_APPROVAL');
       router.push(`/approvals/${id}`);
@@ -79,9 +101,9 @@ function PageContent({ id }: { id: string }) {
               </div>
             </div>
             <div className="text-slate-700 font-bold text-center">
-              <div className="text-lg mb-1">AI Agent evaluating operational policies...</div>
+              <div className="text-lg mb-1">AI Agent orchestrating LLM request...</div>
               <div className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-2">
-                Checking history • Validating lead times • Assessing compliance
+                Calling OpenRouter • Running Guardrails • Verifying Policy
               </div>
             </div>
           </div>
@@ -93,21 +115,34 @@ function PageContent({ id }: { id: string }) {
                 <Sparkles className="w-40 h-40 text-blue-600" />
               </div>
               
-              <div className="flex items-center mb-5 relative z-10">
-                <div className="bg-blue-100 p-2 rounded-lg mr-3">
-                  <Sparkles className="w-5 h-5 text-blue-700" />
+              <div className="flex items-center mb-5 relative z-10 justify-between">
+                <div className="flex items-center">
+                  <div className="bg-blue-100 p-2 rounded-lg mr-3">
+                    <Sparkles className="w-5 h-5 text-blue-700" />
+                  </div>
+                  <h3 className="text-lg font-extrabold text-blue-950 tracking-tight">AI Executive Summary (Live via OpenRouter)</h3>
                 </div>
-                <h3 className="text-lg font-extrabold text-blue-950 tracking-tight">AI Executive Summary</h3>
+                {agenticRetries > 0 && (
+                  <span className="text-[10px] font-bold bg-amber-100 text-amber-700 border border-amber-200 px-3 py-1 rounded-full uppercase flex items-center shadow-sm tracking-wider">
+                    <ShieldCheck className="w-3.5 h-3.5 mr-1.5" /> Agent caught {agenticRetries} Hallucination(s)
+                  </span>
+                )}
               </div>
               
               <div className="relative z-10 text-[14px] leading-relaxed text-blue-900 space-y-4 font-medium max-w-3xl">
-                <p>
-                  Based on the critical disruption to <span className="font-bold text-blue-950 bg-blue-100 px-1.5 py-0.5 rounded">{plan.disruption_id}</span>, 
-                  I have evaluated the recovery plan to activate <span className="font-bold text-blue-950 bg-blue-100 px-1.5 py-0.5 rounded">{plan.supplier_id}</span>.
-                </p>
-                <p>
-                  This action is highly recommended. The supplier has confirmed capacity to safeguard downstream orders. The <strong className="text-slate-800">{plan.max_delay_days}-day lead time</strong> is well within the acceptable tolerance before total plant shutdown. Risk score is {plan.blended_risk.toFixed(2)}.
-                </p>
+                {llmExplanation ? (
+                  <p className="whitespace-pre-wrap">{llmExplanation}</p>
+                ) : (
+                  <>
+                    <p>
+                      Based on the critical disruption to <span className="font-bold text-blue-950 bg-blue-100 px-1.5 py-0.5 rounded">{plan.disruption_id}</span>, 
+                      I have evaluated the recovery plan to activate <span className="font-bold text-blue-950 bg-blue-100 px-1.5 py-0.5 rounded">{plan.supplier_id}</span>.
+                    </p>
+                    <p>
+                      This action is highly recommended. The supplier has confirmed capacity to safeguard downstream orders. The <strong className="text-slate-800">{plan.max_delay_days}-day lead time</strong> is well within the acceptable tolerance before total plant shutdown. Risk score is {plan.blended_risk.toFixed(2)}.
+                    </p>
+                  </>
+                )}
                 <div className="bg-white/60 border border-blue-200 p-4 rounded-lg mt-6 shadow-sm inline-block">
                   <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block mb-1">Conclusion</span>
                   <span className="font-extrabold text-slate-900">Proceed with immediate activation.</span>
@@ -168,7 +203,7 @@ function PageContent({ id }: { id: string }) {
                 disabled={updating}
                 className="bg-blue-600 disabled:opacity-50 hover:bg-blue-700 text-white px-8 py-3.5 rounded-lg text-sm font-bold shadow-sm shadow-blue-500/20 flex items-center transition-all hover:pr-6 group"
               >
-                {updating ? 'Updating Status...' : 'Proceed to Approval'} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                {updating ? 'Processing...' : (plan.status !== 'PENDING_AUDIT' ? 'View Approval Status' : 'Proceed to Approval')} <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
           </div>

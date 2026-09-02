@@ -85,6 +85,12 @@ export function Sidebar() {
             href: activeDisruption ? `/disruptions/${activeDisruption.simulation_id}` : '/disruptions'
           };
         }
+        if (item.name === 'Recovery Plans') {
+          return {
+            ...item,
+            href: '/recovery-plans'
+          };
+        }
         if (item.name === 'Approvals') {
           return {
             ...item,
