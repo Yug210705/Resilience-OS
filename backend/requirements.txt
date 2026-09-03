@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+pydantic-settings
+networkx
+scipy
+pytest
+httpx
+hdbcli
+sqlalchemy-hana

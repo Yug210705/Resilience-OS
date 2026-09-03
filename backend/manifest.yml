@@ -1,0 +1,9 @@
+applications:
+  - name: resilience-os-api
+    memory: 512M
+    disk_quota: 1G
+    buildpacks:
+      - python_buildpack
+    command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    env:
+      DATABASE_URL: hana://DBADMIN:Bharat%40123@b71cfa55-67a0-4d8a-9147-f584ff6f4ab4.hna0.prod-us10.hanacloud.ondemand.com:443?encrypt=true&validateCertificate=false

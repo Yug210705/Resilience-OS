@@ -9,7 +9,7 @@ from datetime import datetime
 from app.core.database import get_db
 from app.engines.recovery_engine import generate_recovery_options
 from app.db.models import RecoveryPlan, AuditRecord, Scenario
-from backend.domain.enums import PlanStatus, ActionType
+from domain.enums import PlanStatus, ActionType
 
 from app.integrations.sap.adapter import Member3SAPAdapter
 from app.integrations.sap.schemas import SAPRecoveryActionRequest
