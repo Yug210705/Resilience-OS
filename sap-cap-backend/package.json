@@ -1,0 +1,18 @@
+{
+  "name": "resilience-os-sap-cap",
+  "version": "1.0.0",
+  "description": "SAP CAP Backend",
+  "dependencies": {
+    "@sap/cds": "^8.0.0",
+    "@sap/xssec": "^4.0.0",
+    "express": "^4.19.0"
+  },
+  "scripts": {
+    "start": "npx -y -p @sap/cds-dk@8 cds serve --in-memory"
+  },
+  "cds": {
+    "requires": {
+      "auth": "mocked"
+    }
+  }
+}

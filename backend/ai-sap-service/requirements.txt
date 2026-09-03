@@ -9,3 +9,5 @@ structlog
 python-dotenv
 httpx
 sse-starlette
+
+openai

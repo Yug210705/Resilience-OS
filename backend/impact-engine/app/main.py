@@ -5,7 +5,10 @@ from app.core.database import Base, engine, get_db
 from app.schemas import DisruptionRequest, DisruptionResponse
 from app.services.impact_service import simulate_disruption, analyze_vulnerabilities
 
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Warning: create_all failed (expected if db is managed by other service): {e}")
 
 app = FastAPI(title="RESILIENCE OS - IMPACT ENGINE")
 app.add_middleware(
