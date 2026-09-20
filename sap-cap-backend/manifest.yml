@@ -1,0 +1,8 @@
+---
+applications:
+- name: resilience-os-sap-cap
+  memory: 256M
+  disk_quota: 512M
+  buildpacks:
+    - nodejs_buildpack
+  command: npm start

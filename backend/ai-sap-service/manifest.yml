@@ -1,0 +1,18 @@
+---
+applications:
+- name: resilience-os-ai-sap
+  memory: 512M
+  disk_quota: 1G
+  buildpacks:
+    - python_buildpack
+  env:
+    OPENROUTER_API_KEY: <YOUR_OPENROUTER_API_KEY>
+    SAP_S4_BASE_URL: https://sandbox.api.sap.com/s4hanacloud
+    SAP_API_KEY: <YOUR_SAP_API_KEY>
+    SAP_BTP_CLIENT_ID: <YOUR_SAP_BTP_CLIENT_ID>
+    SAP_BTP_CLIENT_SECRET: <YOUR_SAP_BTP_CLIENT_SECRET>
+    SAP_BTP_TOKEN_URL: https://30b1d2bftrial.authentication.us10.hana.ondemand.com/oauth/token
+    SAP_DESTINATION_URL: https://sandbox.api.sap.com/s4hanacloud
+    SAP_ES5_USERNAME: P2009506872
+    SAP_ES5_PASSWORD: <YOUR_SAP_ES5_PASSWORD>
+    SAP_HANA_URL: <YOUR_SAP_HANA_URL>
