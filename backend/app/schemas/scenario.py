@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
-from backend.domain.enums import EntityStatus, DisruptionType, DisruptionSeverity
+from domain.enums import EntityStatus, DisruptionType, DisruptionSeverity
 
 class ScenarioCreate(BaseModel):
     scenario_id: str

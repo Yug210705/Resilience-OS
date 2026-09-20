@@ -6,7 +6,7 @@ import Link from 'next/link';
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const sim = searchParams.get('sim');
+  const sim = searchParams?.get('sim');
 
   return (
     <div className="max-w-4xl mx-auto py-12">

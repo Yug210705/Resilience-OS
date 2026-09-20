@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.core.config import settings
 from app.db.models import RecoveryPlan, AuditRecord, Scenario
-from backend.domain.enums import PlanStatus
+from domain.enums import PlanStatus
 
 client = TestClient(app)
 

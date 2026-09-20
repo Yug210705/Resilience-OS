@@ -123,7 +123,7 @@ export function Sidebar() {
             <nav className="space-y-0.5 px-3">
               {group.items.map((item) => {
                 const matchBase = (item as any).basePath ?? item.href;
-                const isActive = pathname === matchBase || pathname.startsWith(`${matchBase}/`);
+                const isActive = pathname === matchBase || pathname?.startsWith(`${matchBase}/`);
                 return (
                   <Link
                     key={item.name}

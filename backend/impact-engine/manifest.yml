@@ -1,0 +1,9 @@
+---
+applications:
+- name: resilience-os-impact
+  memory: 512M
+  disk_quota: 1G
+  buildpacks:
+    - python_buildpack
+  env:
+    SAP_HANA_URL: <YOUR_SAP_HANA_URL>
