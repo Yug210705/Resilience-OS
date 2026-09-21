@@ -100,12 +100,12 @@ export default function Hero() {
       </div>
 
       <motion.div 
-        className="w-full max-w-6xl mt-16 md:mt-24 px-4 md:px-6 relative z-10 perspective-[2000px]"
+        className="w-full max-w-6xl mt-12 md:mt-24 px-4 md:px-6 relative z-10 perspective-[2000px]"
         initial={{ opacity: 0, y: 150, rotateX: 20 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
       >
-        <div className="w-full min-h-[400px] md:min-h-[450px] lg:min-h-[500px] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
+        <div className="w-full min-h-[280px] sm:min-h-[350px] md:min-h-[450px] lg:min-h-[500px] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
           {/* Mockup Header */}
           <div className="h-10 md:h-12 border-b border-white/10 bg-white/5 flex items-center px-4 md:px-6 gap-4 shrink-0">
             <div className="flex gap-2">
@@ -117,17 +117,17 @@ export default function Hero() {
             <span className="text-[10px] md:text-xs font-mono text-white/40">LinqChain Command Center</span>
           </div>
           {/* Mockup Body - Abstract UI */}
-          <div className="flex-1 p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-8 overflow-hidden">
-            <div className="w-full md:w-64 flex flex-col gap-4 shrink-0">
-              <div className="flex flex-row gap-4 w-full">
-                <div className="flex-1 h-20 md:h-24 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-3 md:px-6 shrink-0">
+          <div className="flex-1 p-3 sm:p-4 md:p-8 flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-8 overflow-hidden">
+            <div className="w-full md:w-64 flex flex-col gap-3 sm:gap-4 shrink-0">
+              <div className="flex flex-row gap-3 sm:gap-4 w-full">
+                <div className="flex-1 h-16 sm:h-20 md:h-24 rounded-xl sm:rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-3 md:px-6 shrink-0">
                   <p className="text-[8px] md:text-[10px] text-white/40 tracking-widest uppercase mb-1">Risk Score</p>
                   <div className="flex items-end gap-2">
                     <span className="text-2xl md:text-3xl font-mono text-brand">42</span>
                     <Activity className="w-3 h-3 md:w-4 md:h-4 text-brand mb-1.5" />
                   </div>
                 </div>
-                <div className="flex-1 h-20 md:h-24 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-3 md:px-6 shrink-0">
+                <div className="flex-1 h-16 sm:h-20 md:h-24 rounded-xl sm:rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-3 md:px-6 shrink-0">
                   <p className="text-[8px] md:text-[10px] text-red-400 tracking-widest uppercase mb-1">Disruptions</p>
                   <div className="flex items-end gap-2">
                     <span className="text-2xl md:text-3xl font-mono text-red-400">3</span>
@@ -135,7 +135,7 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
-              <div className="w-full min-h-[100px] md:min-h-0 md:flex-1 rounded-2xl bg-brand/5 border border-brand/20 p-4 md:p-6 flex flex-col relative overflow-hidden shrink-0">
+              <div className="w-full min-h-[80px] sm:min-h-[100px] md:min-h-0 md:flex-1 rounded-xl sm:rounded-2xl bg-brand/5 border border-brand/20 p-3 sm:p-4 md:p-6 flex flex-col relative overflow-hidden shrink-0">
                 <div className="flex items-center gap-2 mb-2 shrink-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                   <p className="text-[8px] md:text-[10px] text-brand tracking-widest uppercase">AI Recommendation</p>

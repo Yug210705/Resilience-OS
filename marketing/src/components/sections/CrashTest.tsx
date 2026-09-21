@@ -53,8 +53,8 @@ export default function CrashTest() {
   const recommendedGlow = useTransform(scrollYProgress, [0.6, 0.75], ["0px 0px 0px rgba(255,159,104,0)", "0px 0px 30px rgba(255,159,104,0.3)"]);
 
   return (
-    <section ref={containerRef} className="relative md:h-[500vh] w-full bg-transparent mt-24 md:mt-64 mb-24 md:mb-32">
-      <div className="md:sticky md:top-0 md:h-screen w-full flex flex-col items-center pt-24 md:pt-16 px-4 md:px-8 lg:px-12 justify-center">
+    <section ref={containerRef} className="relative hidden md:block md:h-[500vh] w-full bg-transparent mt-64 mb-32">
+      <div className="sticky top-0 h-screen w-full flex flex-col items-center pt-16 px-8 lg:px-12">
         
         <div className="w-full max-w-5xl flex flex-col items-center">
           <div className="text-center mb-4 md:mb-6">
