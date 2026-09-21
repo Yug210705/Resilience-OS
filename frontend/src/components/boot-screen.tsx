@@ -1,35 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
+function getInitialShow() {
+  if (typeof window === "undefined") return false;
+  const params = new URLSearchParams(window.location.search);
+  return params.get("transition") === "true";
+}
+
 export function BootScreen() {
-  const [show, setShow] = useState(false);
-  const [isMounted, setIsMounted] = useState(false);
+  // Show immediately on first render if transition=true — no flash of underlying content
+  const [show, setShow] = useState(getInitialShow);
+  const cleanedRef = useRef(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    
-    // Only play the transition if we specifically logged in (has transition=true in URL)
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("transition") === "true") {
-      setShow(true);
+    if (show && !cleanedRef.current) {
+      cleanedRef.current = true;
       
       // Remove the transition parameter from the URL so refreshes don't trigger it again
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
       
-      // Keep the boot screen visible for 1.2s to match the marketing login artificial delay
+      // Keep the boot screen visible for 2s for a premium loading feel
       const timer = setTimeout(() => {
         setShow(false);
-      }, 1200);
+      }, 2000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [show]);
 
-  // Prevent hydration mismatch on initial render
-  if (!isMounted) return null;
+  if (!show) return null;
 
   return (
     <AnimatePresence>
@@ -54,7 +56,7 @@ export function BootScreen() {
               className="h-full bg-blue-600 rounded-full"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: 1.1, ease: "easeOut" }}
+              transition={{ duration: 1.8, ease: "easeOut" }}
             />
           </div>
         </motion.div>
@@ -62,3 +64,4 @@ export function BootScreen() {
     </AnimatePresence>
   );
 }
+

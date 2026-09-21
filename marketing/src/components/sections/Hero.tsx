@@ -80,7 +80,7 @@ export default function Hero() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto px-6 sm:px-0">
             <Link
-              href={productUrl}
+              href="/login"
               className="w-full sm:w-auto group flex items-center justify-center gap-3 text-sm font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(255,159,104,0.3)]"
             >
               Start simulating
