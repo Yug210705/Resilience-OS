@@ -21,16 +21,16 @@ export default function Problem() {
     <section ref={containerRef} className="relative h-[400vh] w-full bg-transparent">
       <div className="sticky top-0 h-screen w-full flex items-center justify-center px-6 md:px-12">
         <div className="max-w-5xl text-center">
-          <motion.p style={{ opacity: opacity1 }} className="text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
+          <motion.p style={{ opacity: opacity1 }} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
             Supply chains don&apos;t fail
           </motion.p>
-          <motion.p style={{ opacity: opacity2 }} className="text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
+          <motion.p style={{ opacity: opacity2 }} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
             in isolation.
           </motion.p>
-          <motion.p style={{ opacity: opacity3 }} className="text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
+          <motion.p style={{ opacity: opacity3 }} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
             One disruption cascades
           </motion.p>
-          <motion.p style={{ opacity: opacity4 }} className="text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight">
+          <motion.p style={{ opacity: opacity4 }} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight">
             across the entire network.
           </motion.p>
         </div>

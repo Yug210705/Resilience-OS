@@ -23,12 +23,12 @@ export default function ProductThesis() {
         <div className="max-w-6xl text-center">
           <motion.h2 
             style={{ opacity: opacity1 }} 
-            className="text-4xl md:text-5xl lg:text-6xl font-serif italic text-white mb-10"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif italic text-white mb-8 md:mb-10"
           >
             An intelligence layer above your systems of record.
           </motion.h2>
           
-          <div className="text-xl md:text-3xl font-sans max-w-4xl mx-auto leading-relaxed flex flex-col gap-2">
+          <div className="text-lg md:text-2xl lg:text-3xl font-sans max-w-4xl mx-auto leading-relaxed flex flex-col gap-1 md:gap-2">
             <motion.p style={{ opacity: opacity2 }} className="text-white">
               Keep your ERPs, WMSs, and TMSs. LinqChain
             </motion.p>

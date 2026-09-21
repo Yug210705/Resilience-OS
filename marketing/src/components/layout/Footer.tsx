@@ -1,11 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { LogoIcon } from "@/components/ui/LogoIcon";
 
 export default function Footer() {
   const productUrl = process.env.NEXT_PUBLIC_APP_URL || "https://resilience-os.vercel.app/command-center";
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleExplore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push('/login');
+    }, 800);
+  };
 
   return (
     <footer className="border-t border-white/10 bg-[#050505] relative z-50 pt-24 pb-12 w-full">
@@ -75,17 +87,32 @@ export default function Footer() {
 
         </div>
 
-        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 max-w-7xl mx-auto">
-          <p className="text-white/30 font-light text-xs">
-            &copy; {new Date().getFullYear()} LinqChain. All rights reserved.
-          </p>
-          <Link
-            href={productUrl}
-            className="group flex items-center gap-2 text-xs font-bold text-brand hover:text-[#FF9F68]/80 transition-colors uppercase tracking-widest"
+        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6 max-w-7xl mx-auto text-center md:text-left">
+          <div className="flex flex-col gap-2 text-white/30 font-light text-xs items-center md:items-start">
+            <p>&copy; {new Date().getFullYear()} LinqChain. All rights reserved.</p>
+            <div className="flex flex-col sm:flex-row flex-wrap justify-center md:justify-start gap-x-2 gap-y-1">
+              <span><span className="text-white/50 font-medium">Yug Pathak</span> - Co-Founder <span className="hidden sm:inline">&nbsp;|&nbsp;</span></span>
+              <span><span className="text-white/50 font-medium">Aayush Patidar</span> - Co-Founder <span className="hidden sm:inline">&nbsp;|&nbsp;</span></span>
+              <span><span className="text-white/50 font-medium">Yash Pathak</span> - Co-Founder</span>
+            </div>
+          </div>
+          <button
+            onClick={handleExplore}
+            disabled={isLoading}
+            className="group flex items-center gap-2 text-xs font-bold text-brand hover:text-[#FF9F68]/80 transition-colors uppercase tracking-widest disabled:opacity-70"
           >
-            Explore the platform
-            <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-          </Link>
+            {isLoading ? (
+              <>
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Initializing...
+              </>
+            ) : (
+              <>
+                Explore the platform
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </button>
         </div>
       </div>
     </footer>

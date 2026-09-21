@@ -20,10 +20,10 @@ export default function DecisionSupport() {
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           
           <motion.div>
-            <motion.h2 style={{ opacity: opacity1 }} className="text-4xl md:text-6xl font-serif italic text-white mb-6">
+            <motion.h2 style={{ opacity: opacity1 }} className="text-3xl sm:text-4xl md:text-6xl font-serif italic text-white mb-4 md:mb-6">
               From signal to impact.
             </motion.h2>
-            <motion.p style={{ opacity: opacity2 }} className="text-xl text-white/70 mb-12 font-light">
+            <motion.p style={{ opacity: opacity2 }} className="text-lg md:text-xl text-white/70 mb-10 md:mb-12 font-light">
               Don&apos;t just detect risk. Evaluate what to do next with AI-assisted resolution paths.
             </motion.p>
             
@@ -65,19 +65,19 @@ export default function DecisionSupport() {
             viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <div className="flex items-center gap-3 mb-8">
-              <AlertCircle className="w-5 h-5 text-red-500" />
-              <h3 className="text-sm font-medium tracking-widest text-white uppercase">PORT CONGESTION DETECTED</h3>
+            <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
+              <AlertCircle className="w-4 h-4 md:w-5 md:h-5 text-red-500" />
+              <h3 className="text-xs md:text-sm font-medium tracking-widest text-white uppercase">PORT CONGESTION DETECTED</h3>
             </div>
             
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10">
-                <p className="text-[10px] tracking-widest text-white/40 uppercase mb-2">Route</p>
-                <p className="text-base font-bold text-white">Shanghai → Mumbai</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-8">
+              <div className="p-4 md:p-5 rounded-2xl bg-white/5 border border-white/10">
+                <p className="text-[9px] md:text-[10px] tracking-widest text-white/40 uppercase mb-1 md:mb-2">Route</p>
+                <p className="text-sm md:text-base font-bold text-white">Shanghai → Mumbai</p>
               </div>
-              <div className="p-5 rounded-2xl bg-red-500/10 border border-red-500/20">
-                <p className="text-[10px] tracking-widest text-red-400 uppercase mb-2">Potential Impact</p>
-                <p className="text-base font-bold text-red-400">14 Shipments Delayed</p>
+              <div className="p-4 md:p-5 rounded-2xl bg-red-500/10 border border-red-500/20">
+                <p className="text-[9px] md:text-[10px] tracking-widest text-red-400 uppercase mb-1 md:mb-2">Potential Impact</p>
+                <p className="text-sm md:text-base font-bold text-red-400">14 Shipments Delayed</p>
               </div>
             </div>
 

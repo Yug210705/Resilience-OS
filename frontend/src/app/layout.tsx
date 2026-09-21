@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import Providers from "@/components/providers";
+import { BootScreen } from "@/components/boot-screen";
 
 const roboto = Roboto({ 
   weight: ['300', '400', '500', '700', '900'],
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${roboto.className} bg-slate-50 dark:bg-slate-950 flex h-screen overflow-hidden text-slate-900 dark:text-slate-100`}>
         <Providers>
+          <BootScreen />
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0">
             <Topbar />
