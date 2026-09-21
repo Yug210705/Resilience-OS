@@ -53,8 +53,8 @@ export default function CrashTest() {
   const recommendedGlow = useTransform(scrollYProgress, [0.6, 0.75], ["0px 0px 0px rgba(255,159,104,0)", "0px 0px 30px rgba(255,159,104,0.3)"]);
 
   return (
-    <section ref={containerRef} className="relative h-[500vh] w-full bg-transparent mt-32 md:mt-64 mb-32">
-      <div className="sticky top-0 h-screen w-full flex flex-col items-center pt-12 md:pt-16 px-4 md:px-8 lg:px-12">
+    <section ref={containerRef} className="relative md:h-[500vh] w-full bg-transparent mt-24 md:mt-64 mb-24 md:mb-32">
+      <div className="md:sticky md:top-0 md:h-screen w-full flex flex-col items-center pt-24 md:pt-16 px-4 md:px-8 lg:px-12 justify-center">
         
         <div className="w-full max-w-5xl flex flex-col items-center">
           <div className="text-center mb-4 md:mb-6">
@@ -66,7 +66,7 @@ export default function CrashTest() {
             </p>
           </div>
 
-          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl overflow-y-auto max-h-[85vh] shadow-2xl shrink-0 hide-scrollbar">
+          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl md:overflow-y-auto md:max-h-[85vh] shadow-2xl shrink-0 hide-scrollbar">
             <div className="border-b border-white/10 bg-white/5 p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />

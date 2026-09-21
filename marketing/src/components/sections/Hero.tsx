@@ -118,22 +118,24 @@ export default function Hero() {
           </div>
           {/* Mockup Body - Abstract UI */}
           <div className="flex-1 p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-8 overflow-hidden">
-            <div className="w-full md:w-64 flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 hide-scrollbar shrink-0">
-              <div className="h-20 md:h-24 min-w-[140px] md:min-w-0 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-4 md:px-6 shrink-0">
-                <p className="text-[8px] md:text-[10px] text-white/40 tracking-widest uppercase mb-1">Global Risk Score</p>
-                <div className="flex items-end gap-2 md:gap-3">
-                  <span className="text-2xl md:text-3xl font-mono text-brand">42</span>
-                  <Activity className="w-3 h-3 md:w-4 md:h-4 text-brand mb-1.5" />
+            <div className="w-full md:w-64 flex flex-col gap-4 shrink-0">
+              <div className="flex flex-row gap-4 w-full">
+                <div className="flex-1 h-20 md:h-24 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-3 md:px-6 shrink-0">
+                  <p className="text-[8px] md:text-[10px] text-white/40 tracking-widest uppercase mb-1">Risk Score</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-2xl md:text-3xl font-mono text-brand">42</span>
+                    <Activity className="w-3 h-3 md:w-4 md:h-4 text-brand mb-1.5" />
+                  </div>
+                </div>
+                <div className="flex-1 h-20 md:h-24 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-3 md:px-6 shrink-0">
+                  <p className="text-[8px] md:text-[10px] text-red-400 tracking-widest uppercase mb-1">Disruptions</p>
+                  <div className="flex items-end gap-2">
+                    <span className="text-2xl md:text-3xl font-mono text-red-400">3</span>
+                    <ShieldAlert className="w-3 h-3 md:w-4 md:h-4 text-red-400 mb-1.5" />
+                  </div>
                 </div>
               </div>
-              <div className="h-20 md:h-24 min-w-[140px] md:min-w-0 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-4 md:px-6 shrink-0">
-                <p className="text-[8px] md:text-[10px] text-red-400 tracking-widest uppercase mb-1">Active Disruptions</p>
-                <div className="flex items-end gap-2 md:gap-3">
-                  <span className="text-2xl md:text-3xl font-mono text-red-400">3</span>
-                  <ShieldAlert className="w-3 h-3 md:w-4 md:h-4 text-red-400 mb-1.5" />
-                </div>
-              </div>
-              <div className="flex-1 min-w-[200px] md:min-w-0 rounded-2xl bg-brand/5 border border-brand/20 p-4 md:p-6 flex flex-col relative overflow-hidden shrink-0">
+              <div className="w-full min-h-[100px] md:min-h-0 md:flex-1 rounded-2xl bg-brand/5 border border-brand/20 p-4 md:p-6 flex flex-col relative overflow-hidden shrink-0">
                 <div className="flex items-center gap-2 mb-2 shrink-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                   <p className="text-[8px] md:text-[10px] text-brand tracking-widest uppercase">AI Recommendation</p>

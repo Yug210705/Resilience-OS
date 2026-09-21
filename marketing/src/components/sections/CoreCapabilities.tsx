@@ -56,7 +56,7 @@ export default function CoreCapabilities() {
             <motion.div 
               key={cap.id} 
               variants={cardVariants}
-              className="w-[300px] sm:w-[350px] md:w-auto flex-shrink-0 group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 lg:p-10 overflow-hidden hover:bg-white/10 transition-all duration-500"
+              className="w-[280px] sm:w-[320px] md:w-auto flex-shrink-0 group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8 lg:p-10 overflow-hidden hover:bg-white/10 transition-all duration-500"
             >
               <div className="flex flex-col gap-4 lg:gap-6 mb-6 lg:mb-8 relative z-10">
                 <div className="w-14 h-14 rounded-full bg-brand/20 flex items-center justify-center text-brand group-hover:scale-110 transition-transform duration-500">
