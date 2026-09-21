@@ -41,13 +41,16 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="fixed top-0 inset-x-0 z-50 w-full pt-6 pointer-events-none">
-      <div className="w-full px-6 md:px-12 flex items-center justify-between pointer-events-auto">
+    <header className={cn(
+      "fixed top-0 inset-x-0 z-50 w-full pt-4 md:pt-6 pointer-events-none transition-all duration-300",
+      isScrolled ? "bg-black/80 backdrop-blur-xl md:bg-transparent md:backdrop-blur-none pb-4 md:pb-0" : ""
+    )}>
+      <div className="w-full px-4 md:px-12 flex items-center justify-between pointer-events-auto">
         
         {/* Top Left Logo */}
         <div className="flex-1 flex justify-start">
           <Link href="/" className="flex items-center gap-3 z-50 mix-blend-difference group">
-            <LogoIcon className="w-8 h-8 text-white group-hover:scale-105 transition-transform" />
+            <LogoIcon className="w-7 h-7 md:w-8 md:h-8 text-white group-hover:scale-105 transition-transform" />
             <span className="font-serif italic text-2xl md:text-3xl tracking-wide text-white flex items-center">
               Linq<span className="ml-[2px]">Chain</span>
             </span>

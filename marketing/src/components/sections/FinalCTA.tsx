@@ -30,14 +30,14 @@ export default function FinalCTA() {
   const y2 = useTransform(scrollYProgress, [0.3, 0.8], [50, 0]);
 
   return (
-    <section ref={containerRef} className="py-40 w-full relative overflow-hidden bg-transparent">
+    <section ref={containerRef} className="py-20 md:py-40 w-full relative overflow-hidden bg-transparent">
       
       <div className="w-full px-6 md:px-12 lg:px-24 relative z-10">
         <motion.div 
-          className="max-w-5xl mx-auto text-center border border-white/10 bg-black/40 backdrop-blur-2xl p-16 md:p-24 rounded-3xl"
+          className="max-w-5xl mx-auto text-center border border-white/10 bg-black/40 backdrop-blur-2xl p-8 md:p-16 lg:p-24 rounded-2xl md:rounded-3xl"
           style={{ opacity: opacity1, y: y1 }}
         >
-          <motion.h2 className="text-5xl md:text-7xl font-serif italic text-white mb-6">
+          <motion.h2 className="text-3xl md:text-5xl lg:text-7xl font-serif italic text-white mb-4 md:mb-6">
             Build resilience.
           </motion.h2>
           <motion.p style={{ opacity: opacity2, y: y2 }} className="text-xl text-white/60 font-light mb-12 max-w-2xl mx-auto">
