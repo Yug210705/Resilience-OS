@@ -1,13 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { useRef } from "react";
 
 export default function FinalCTA() {
   const productUrl = process.env.NEXT_PUBLIC_APP_URL || "https://resilience-os.vercel.app/command-center";
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleExplore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setTimeout(() => {
+      router.push('/login');
+    }, 800);
+  };
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start end", "center center"]
@@ -34,13 +45,23 @@ export default function FinalCTA() {
           </motion.p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-            <Link
-              href={productUrl}
-              className="group flex items-center justify-center gap-3 w-full sm:w-auto text-sm font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:opacity-90 transition-all duration-300 shadow-xl shadow-[#FF9F68]/20"
+            <button
+              onClick={handleExplore}
+              disabled={isLoading}
+              className="group flex items-center justify-center gap-3 w-full sm:w-auto text-sm font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:opacity-90 transition-all duration-300 shadow-xl shadow-[#FF9F68]/20 disabled:opacity-70"
             >
-              Explore the platform
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </Link>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Initializing...
+                </>
+              ) : (
+                <>
+                  Explore the platform
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
           </div>
         </motion.div>
       </div>

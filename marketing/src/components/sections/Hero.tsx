@@ -54,41 +54,41 @@ export default function Hero() {
 
         {/* Headlines */}
         <motion.div 
-          className="max-w-6xl w-full text-center flex flex-col items-center justify-center mb-8"
+          className="max-w-6xl w-full text-center flex flex-col items-center justify-center mb-6 md:mb-8"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
         >
-          <h1 className="text-6xl md:text-8xl lg:text-[7rem] font-sans font-semibold tracking-tighter text-white leading-none mb-2 text-balance drop-shadow-2xl">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[7rem] font-sans font-semibold tracking-tighter text-white leading-none mb-2 md:mb-2 text-balance drop-shadow-2xl">
             The operating system
           </h1>
-          <h1 className="text-6xl md:text-8xl lg:text-[7.5rem] font-serif italic text-brand tracking-tighter leading-none text-balance drop-shadow-2xl pr-4">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-[7.5rem] font-serif italic text-brand tracking-tighter leading-none text-balance drop-shadow-2xl pr-0 md:pr-4">
             for your supply chain.
           </h1>
         </motion.div>
 
         {/* Subtitle & CTAs */}
         <motion.div
-          className="max-w-2xl text-center"
+          className="max-w-2xl text-center w-full"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, delay: 0.4 }}
         >
-          <p className="text-lg md:text-xl text-white/70 font-light tracking-wide text-balance leading-relaxed mb-10">
+          <p className="text-base sm:text-lg md:text-xl text-white/70 font-light tracking-wide text-balance leading-relaxed mb-8 md:mb-10 px-4 md:px-0">
             See the physical network in real-time. Simulate cascading disruptions. Let AI map your fastest path to recovery.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto px-6 sm:px-0">
             <Link
               href={productUrl}
-              className="group flex items-center justify-center gap-3 text-sm font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(255,159,104,0.3)]"
+              className="w-full sm:w-auto group flex items-center justify-center gap-3 text-sm font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:bg-white transition-all duration-300 shadow-[0_0_40px_rgba(255,159,104,0.3)]"
             >
               Start simulating
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="#how-it-works"
-              className="group flex items-center justify-center gap-3 text-sm font-bold bg-black/40 border border-white/20 text-white px-10 py-4 rounded-full hover:bg-white/10 transition-all duration-300 backdrop-blur-md hover:border-white/40"
+              className="w-full sm:w-auto group flex items-center justify-center gap-3 text-sm font-bold bg-black/40 border border-white/20 text-white px-10 py-4 rounded-full hover:bg-white/10 transition-all duration-300 backdrop-blur-md hover:border-white/40"
             >
               <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
                 <Play className="w-3 h-3 fill-white ml-0.5" />
@@ -101,57 +101,58 @@ export default function Hero() {
 
       {/* Floating Mockup UI (Fills the empty space below) */}
       <motion.div 
-        className="w-full max-w-6xl mt-24 px-6 relative z-10 perspective-[2000px]"
+        className="w-full max-w-6xl mt-16 md:mt-24 px-4 md:px-6 relative z-10 perspective-[2000px]"
         initial={{ opacity: 0, y: 150, rotateX: 20 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
       >
-        <div className="w-full aspect-[21/9] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
+        <div className="w-full min-h-[400px] md:min-h-0 md:aspect-[21/9] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
           {/* Mockup Header */}
-          <div className="h-12 border-b border-white/10 bg-white/5 flex items-center px-6 gap-4">
+          <div className="h-10 md:h-12 border-b border-white/10 bg-white/5 flex items-center px-4 md:px-6 gap-4 shrink-0">
             <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
+              <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-red-500/80" />
+              <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-yellow-500/80" />
+              <div className="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-green-500/80" />
             </div>
             <div className="w-px h-4 bg-white/10 mx-2" />
-            <span className="text-xs font-mono text-white/40">LinqChain Command Center</span>
+            <span className="text-[10px] md:text-xs font-mono text-white/40">LinqChain Command Center</span>
           </div>
           {/* Mockup Body - Abstract UI */}
-          <div className="flex-1 p-8 flex gap-8">
-            <div className="w-64 flex flex-col gap-4">
-              <div className="h-24 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-6">
-                <p className="text-[10px] text-white/40 tracking-widest uppercase mb-1">Global Risk Score</p>
-                <div className="flex items-end gap-3">
-                  <span className="text-3xl font-mono text-brand">42</span>
-                  <Activity className="w-4 h-4 text-brand mb-1.5" />
+          <div className="flex-1 p-4 md:p-8 flex flex-col md:flex-row gap-4 md:gap-8 overflow-hidden">
+            <div className="w-full md:w-64 flex flex-row md:flex-col gap-4 overflow-x-auto md:overflow-visible pb-2 md:pb-0 hide-scrollbar shrink-0">
+              <div className="h-20 md:h-24 min-w-[140px] md:min-w-0 rounded-2xl bg-white/5 border border-white/10 flex flex-col justify-center px-4 md:px-6 shrink-0">
+                <p className="text-[8px] md:text-[10px] text-white/40 tracking-widest uppercase mb-1">Global Risk Score</p>
+                <div className="flex items-end gap-2 md:gap-3">
+                  <span className="text-2xl md:text-3xl font-mono text-brand">42</span>
+                  <Activity className="w-3 h-3 md:w-4 md:h-4 text-brand mb-1.5" />
                 </div>
               </div>
-              <div className="h-24 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-6">
-                <p className="text-[10px] text-red-400 tracking-widest uppercase mb-1">Active Disruptions</p>
-                <div className="flex items-end gap-3">
-                  <span className="text-3xl font-mono text-red-400">3</span>
-                  <ShieldAlert className="w-4 h-4 text-red-400 mb-1.5" />
+              <div className="h-20 md:h-24 min-w-[140px] md:min-w-0 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col justify-center px-4 md:px-6 shrink-0">
+                <p className="text-[8px] md:text-[10px] text-red-400 tracking-widest uppercase mb-1">Active Disruptions</p>
+                <div className="flex items-end gap-2 md:gap-3">
+                  <span className="text-2xl md:text-3xl font-mono text-red-400">3</span>
+                  <ShieldAlert className="w-3 h-3 md:w-4 md:h-4 text-red-400 mb-1.5" />
                 </div>
               </div>
-              <div className="flex-1 rounded-2xl bg-brand/5 border border-brand/20 p-6 flex flex-col relative overflow-hidden">
-                <div className="flex items-center gap-2 mb-2">
+              <div className="flex-1 min-w-[200px] md:min-w-0 rounded-2xl bg-brand/5 border border-brand/20 p-4 md:p-6 flex flex-col relative overflow-hidden shrink-0">
+                <div className="flex items-center gap-2 mb-2 shrink-0">
                   <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-                  <p className="text-[10px] text-brand tracking-widest uppercase">AI Recommendation</p>
+                  <p className="text-[8px] md:text-[10px] text-brand tracking-widest uppercase">AI Recommendation</p>
                 </div>
-                <div className="relative flex-1">
-                  <div className="absolute inset-0 text-xs md:text-sm text-white/90 font-mono leading-relaxed whitespace-pre-wrap">
+                <div className="relative flex-1 min-h-[80px]">
+                  <div className="absolute inset-0 text-[10px] md:text-sm text-white/90 font-mono leading-relaxed whitespace-pre-wrap">
                     {fullText.substring(0, textIndex)}
                     <motion.span 
                       animate={{ opacity: [1, 0] }} 
                       transition={{ repeat: Infinity, duration: 0.8 }}
-                      className="inline-block w-1.5 h-3.5 bg-brand ml-0.5 align-middle"
+                      className="inline-block w-1 h-2.5 md:w-1.5 md:h-3.5 bg-brand ml-0.5 align-middle"
                     />
                   </div>
                 </div>
               </div>
             </div>
-            <div className="flex-1 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent relative overflow-hidden flex items-center justify-center">
+            
+            <div className="hidden md:flex flex-1 rounded-2xl border border-white/10 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent relative overflow-hidden items-center justify-center">
                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:2rem_2rem]" />
                
                {/* Animated Supply Chain Flow */}

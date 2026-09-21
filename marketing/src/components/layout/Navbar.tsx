@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Menu, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/ui/LogoIcon";
 
@@ -18,6 +19,16 @@ const navLinks = [
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
+
+  const handleExplore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    setTimeout(() => {
+      router.push('/login');
+    }, 800);
+  };
 
   const productUrl = process.env.NEXT_PUBLIC_APP_URL || "https://resilience-os.vercel.app/command-center";
 
@@ -37,7 +48,7 @@ export default function Navbar() {
         <div className="flex-1 flex justify-start">
           <Link href="/" className="flex items-center gap-3 z-50 mix-blend-difference group">
             <LogoIcon className="w-8 h-8 text-white group-hover:scale-105 transition-transform" />
-            <span className="font-serif italic text-3xl tracking-wide text-white flex items-center">
+            <span className="font-serif italic text-2xl md:text-3xl tracking-wide text-white flex items-center">
               Linq<span className="ml-[2px]">Chain</span>
             </span>
           </Link>
@@ -58,12 +69,20 @@ export default function Navbar() {
 
         {/* Right CTA */}
         <div className="hidden md:flex flex-1 justify-end items-center">
-          <Link
-            href={productUrl}
-            className="flex items-center gap-2 text-sm font-bold bg-[#FF9F68] text-black px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity duration-300 shadow-lg shadow-[#FF9F68]/20"
+          <button
+            onClick={handleExplore}
+            disabled={isNavigating}
+            className="flex items-center gap-2 text-sm font-bold bg-[#FF9F68] text-black px-6 py-2.5 rounded-full hover:opacity-90 transition-opacity duration-300 shadow-lg shadow-[#FF9F68]/20 disabled:opacity-70"
           >
-            Explore the platform
-          </Link>
+            {isNavigating ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Initializing...
+              </>
+            ) : (
+              "Explore the platform"
+            )}
+          </button>
         </div>
 
         {/* Mobile Toggle */}
@@ -97,13 +116,23 @@ export default function Navbar() {
             </Link>
           ))}
           <div className="mt-10 pt-10 border-t border-white/10 w-full flex justify-center">
-            <Link
-              href={productUrl}
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:opacity-90 transition-colors shadow-lg"
+            <button
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                handleExplore(e);
+              }}
+              disabled={isNavigating}
+              className="flex items-center gap-2 text-lg font-bold bg-[#FF9F68] text-black px-10 py-4 rounded-full hover:opacity-90 transition-colors shadow-lg disabled:opacity-70"
             >
-              Explore the platform
-            </Link>
+              {isNavigating ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Initializing...
+                </>
+              ) : (
+                "Explore the platform"
+              )}
+            </button>
           </div>
         </nav>
       </div>

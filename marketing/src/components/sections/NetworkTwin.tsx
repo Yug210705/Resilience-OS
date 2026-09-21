@@ -106,7 +106,7 @@ export default function NetworkTwin() {
       <div className="sticky top-0 h-screen w-full flex flex-col items-center pt-24 pb-6 md:pb-8 px-6 md:px-12 lg:px-24">
         
         <div className="max-w-4xl mx-auto text-center shrink-0 mb-6">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif italic text-white mb-4">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif italic text-white mb-3 md:mb-4">
             Map every dependency.
           </h2>
           <p className="text-lg md:text-xl text-white/70 max-w-3xl mx-auto font-light leading-relaxed">
@@ -114,7 +114,8 @@ export default function NetworkTwin() {
           </p>
         </div>
 
-        <div className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 border border-white/10 rounded-3xl bg-black/60 backdrop-blur-2xl p-4 md:p-8 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.8)]">
+        <div className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 border border-white/10 rounded-3xl bg-black/60 backdrop-blur-2xl p-4 md:p-8 overflow-x-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] hide-scrollbar">
+          <div className="min-w-[600px] lg:min-w-0 w-full h-full relative">
           
           {/* Tech Grid Background */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />
@@ -236,6 +237,7 @@ export default function NetworkTwin() {
               </motion.div>
             );
           })}
+          </div>
         </div>
       </div>
     </section>

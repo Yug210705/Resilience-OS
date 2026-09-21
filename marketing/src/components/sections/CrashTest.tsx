@@ -58,7 +58,7 @@ export default function CrashTest() {
         
         <div className="w-full max-w-5xl flex flex-col items-center">
           <div className="text-center mb-4 md:mb-6">
-            <h2 className="text-4xl md:text-5xl font-serif italic text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif italic text-white mb-3 md:mb-4">
               Crash-test your supply chain.
             </h2>
             <p className="text-lg text-white/70 max-w-3xl mx-auto font-sans font-light">
@@ -66,7 +66,7 @@ export default function CrashTest() {
             </p>
           </div>
 
-          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl overflow-hidden shadow-2xl shrink-0">
+          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl overflow-y-auto max-h-[75vh] md:max-h-none md:overflow-hidden shadow-2xl shrink-0 hide-scrollbar">
             <div className="border-b border-white/10 bg-white/5 p-3 md:p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
@@ -80,31 +80,31 @@ export default function CrashTest() {
               
               {/* Impact Panel */}
               <motion.div style={{ opacity: impactOpacity, x: impactX }}>
-                <div className="mb-6">
-                  <h3 className="text-2xl font-serif italic text-white mb-1">Primary Supplier</h3>
-                  <p className="text-red-400 font-bold text-sm tracking-wide uppercase">Offline for 14 Days</p>
+                <div className="mb-4 md:mb-6">
+                  <h3 className="text-xl md:text-2xl font-serif italic text-white mb-1">Primary Supplier</h3>
+                  <p className="text-red-400 font-bold text-xs md:text-sm tracking-wide uppercase">Offline for 14 Days</p>
                 </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                    <Package className="w-5 h-5 text-brand" />
+                <div className="space-y-2 md:space-y-3">
+                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-white/5 border border-white/10">
+                    <Package className="w-4 h-4 md:w-5 md:h-5 text-brand" />
                     <div>
-                      <p className="text-xl font-bold text-white leading-tight">18,420</p>
-                      <p className="text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Orders at risk</p>
+                      <p className="text-lg md:text-xl font-bold text-white leading-tight">18,420</p>
+                      <p className="text-[8px] md:text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Orders at risk</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                    <Clock className="w-5 h-5 text-brand" />
+                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-white/5 border border-white/10">
+                    <Clock className="w-4 h-4 md:w-5 md:h-5 text-brand" />
                     <div>
-                      <p className="text-xl font-bold text-white leading-tight">11 Days</p>
-                      <p className="text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Inventory runway</p>
+                      <p className="text-lg md:text-xl font-bold text-white leading-tight">11 Days</p>
+                      <p className="text-[8px] md:text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Inventory runway</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10">
-                    <TrendingUp className="w-5 h-5 text-brand" />
+                  <div className="flex items-center gap-3 md:gap-4 p-3 md:p-4 rounded-xl bg-white/5 border border-white/10">
+                    <TrendingUp className="w-4 h-4 md:w-5 md:h-5 text-brand" />
                     <div>
-                      <p className="text-xl font-bold text-white leading-tight">37</p>
-                      <p className="text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Shipments affected</p>
+                      <p className="text-lg md:text-xl font-bold text-white leading-tight">37</p>
+                      <p className="text-[8px] md:text-[10px] text-white/50 tracking-widest uppercase mt-0.5">Shipments affected</p>
                     </div>
                   </div>
                 </div>
@@ -112,34 +112,34 @@ export default function CrashTest() {
 
               {/* Recovery Panel */}
               <motion.div style={{ opacity: recoveryOpacity, x: recoveryX }}>
-                <h4 className="text-[10px] text-white/50 tracking-widest uppercase mb-4">Recovery Paths</h4>
-                <div className="space-y-3">
+                <h4 className="text-[9px] md:text-[10px] text-white/50 tracking-widest uppercase mb-3 md:mb-4">Recovery Paths</h4>
+                <div className="space-y-2 md:space-y-3">
                   {PATHS.map((path) => (
                     <motion.div 
                       key={path.name} 
                       style={path.recommended ? { scale: recommendedScale, boxShadow: recommendedGlow } : {}}
-                      className={`p-4 rounded-xl border ${path.recommended ? "border-brand bg-brand/10 relative z-10" : "border-white/10 bg-white/5"}`}
+                      className={`p-3 md:p-4 rounded-xl border ${path.recommended ? "border-brand bg-brand/10 relative z-10" : "border-white/10 bg-white/5"}`}
                     >
                       {path.recommended && (
-                        <div className="mb-2 text-[10px] tracking-widest text-brand uppercase flex items-center gap-1.5">
-                          <CheckCircle2 className="w-3 h-3" /> Recommended
+                        <div className="mb-1.5 md:mb-2 text-[8px] md:text-[10px] tracking-widest text-brand uppercase flex items-center gap-1.5">
+                          <CheckCircle2 className="w-2.5 h-2.5 md:w-3 md:h-3" /> Recommended
                         </div>
                       )}
-                      <h5 className="text-base font-bold text-white mb-0.5">{path.name}</h5>
-                      <p className="text-xs text-white/60 mb-3">{path.desc}</p>
+                      <h5 className="text-sm md:text-base font-bold text-white mb-0.5">{path.name}</h5>
+                      <p className="text-[10px] md:text-xs text-white/60 mb-2 md:mb-3">{path.desc}</p>
                       
-                      <div className="grid grid-cols-3 gap-2">
+                      <div className="grid grid-cols-3 gap-1 md:gap-2">
                         <div>
-                          <p className="text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Cost</p>
-                          <p className="text-xs font-mono text-white">{path.cost}</p>
+                          <p className="text-[7px] md:text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Cost</p>
+                          <p className="text-[9px] md:text-xs font-mono text-white">{path.cost}</p>
                         </div>
                         <div>
-                          <p className="text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Delay</p>
-                          <p className="text-xs font-mono text-white">{path.delay}</p>
+                          <p className="text-[7px] md:text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Delay</p>
+                          <p className="text-[9px] md:text-xs font-mono text-white">{path.delay}</p>
                         </div>
                         <div>
-                          <p className="text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Risk</p>
-                          <p className="text-xs font-mono text-white">{path.risk}</p>
+                          <p className="text-[7px] md:text-[9px] text-white/40 tracking-widest uppercase mb-0.5">Risk</p>
+                          <p className="text-[9px] md:text-xs font-mono text-white">{path.risk}</p>
                         </div>
                       </div>
                     </motion.div>
