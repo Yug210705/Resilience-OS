@@ -18,7 +18,7 @@ export default function ProductThesis() {
   const opacity4 = useTransform(scrollYProgress, [0.65, 0.8], [0.2, 1]);
 
   return (
-    <section id="platform" ref={containerRef} className="relative h-[400vh] w-full bg-transparent">
+    <section id="platform" ref={containerRef} className="relative h-[200vh] md:h-[400vh] w-full bg-transparent">
       <div className="sticky top-0 h-screen w-full flex items-center justify-center px-6 md:px-12">
         <div className="max-w-6xl text-center">
           <motion.h2 
