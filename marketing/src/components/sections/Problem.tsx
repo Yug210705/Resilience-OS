@@ -18,7 +18,7 @@ export default function Problem() {
   const opacity4 = useTransform(scrollYProgress, [0.65, 0.8], [0.2, 1]);
 
   return (
-    <section ref={containerRef} className="relative h-[400vh] w-full bg-transparent">
+    <section ref={containerRef} className="relative h-[200vh] md:h-[400vh] w-full bg-transparent">
       <div className="sticky top-0 h-screen w-full flex items-center justify-center px-6 md:px-12">
         <div className="max-w-5xl text-center">
           <motion.p style={{ opacity: opacity1 }} className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-sans font-medium text-white tracking-tight leading-tight mb-2">
