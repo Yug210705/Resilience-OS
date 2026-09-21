@@ -102,8 +102,8 @@ export default function NetworkTwin() {
   };
 
   return (
-    <section id="network" ref={containerRef} className="relative md:h-[500vh] bg-transparent w-full mt-24 md:mt-64 mb-24 md:mb-32">
-      <div className="md:sticky md:top-0 md:h-screen w-full flex flex-col items-center pt-24 md:pt-24 pb-6 md:pb-8 px-4 md:px-12 lg:px-24 justify-center">
+    <section id="network" ref={containerRef} className="relative hidden md:block md:h-[500vh] bg-transparent w-full mt-64 mb-32">
+      <div className="sticky top-0 h-screen w-full flex flex-col items-center pt-24 pb-8 px-12 lg:px-24">
         
         <div className="max-w-4xl mx-auto text-center shrink-0 mb-6">
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif italic text-white mb-3 md:mb-4">
