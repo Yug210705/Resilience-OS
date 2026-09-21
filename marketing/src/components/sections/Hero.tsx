@@ -99,14 +99,13 @@ export default function Hero() {
         </motion.div>
       </div>
 
-      {/* Floating Mockup UI (Fills the empty space below) */}
       <motion.div 
         className="w-full max-w-6xl mt-16 md:mt-24 px-4 md:px-6 relative z-10 perspective-[2000px]"
         initial={{ opacity: 0, y: 150, rotateX: 20 }}
         animate={{ opacity: 1, y: 0, rotateX: 0 }}
         transition={{ duration: 1.5, delay: 0.6, ease: "easeOut" }}
       >
-        <div className="w-full min-h-[400px] md:min-h-0 md:aspect-[21/9] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
+        <div className="w-full min-h-[400px] md:min-h-[450px] lg:min-h-[500px] rounded-t-3xl border border-white/20 bg-black/50 backdrop-blur-3xl shadow-[0_-20px_80px_rgba(0,0,0,0.8)] overflow-hidden relative flex flex-col">
           {/* Mockup Header */}
           <div className="h-10 md:h-12 border-b border-white/10 bg-white/5 flex items-center px-4 md:px-6 gap-4 shrink-0">
             <div className="flex gap-2">

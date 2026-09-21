@@ -66,8 +66,8 @@ export default function CrashTest() {
             </p>
           </div>
 
-          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl overflow-y-auto max-h-[75vh] md:max-h-none md:overflow-hidden shadow-2xl shrink-0 hide-scrollbar">
-            <div className="border-b border-white/10 bg-white/5 p-3 md:p-4 flex items-center justify-between">
+          <div className="w-full border border-white/10 rounded-2xl bg-black/60 backdrop-blur-2xl overflow-y-auto max-h-[85vh] shadow-2xl shrink-0 hide-scrollbar">
+            <div className="border-b border-white/10 bg-white/5 p-3 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
                 <span className="text-[10px] font-medium tracking-widest text-red-400 uppercase">
@@ -76,12 +76,12 @@ export default function CrashTest() {
               </div>
             </div>
 
-            <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+            <div className="p-4 md:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
               
               {/* Impact Panel */}
               <motion.div style={{ opacity: impactOpacity, x: impactX }}>
-                <div className="mb-4 md:mb-6">
-                  <h3 className="text-xl md:text-2xl font-serif italic text-white mb-1">Primary Supplier</h3>
+                <div className="mb-4">
+                  <h3 className="text-lg md:text-xl lg:text-2xl font-serif italic text-white mb-1">Primary Supplier</h3>
                   <p className="text-red-400 font-bold text-xs md:text-sm tracking-wide uppercase">Offline for 14 Days</p>
                 </div>
 

@@ -114,8 +114,8 @@ export default function NetworkTwin() {
           </p>
         </div>
 
-        <div className="relative w-full max-w-6xl mx-auto flex-1 min-h-0 border border-white/10 rounded-3xl bg-black/60 backdrop-blur-2xl p-4 md:p-8 overflow-x-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] hide-scrollbar">
-          <div className="min-w-[600px] lg:min-w-0 w-full h-full relative">
+        <div className="relative w-full max-w-6xl mx-auto flex-1 min-h-[400px] lg:min-h-[500px] border border-white/10 rounded-3xl bg-black/60 backdrop-blur-2xl p-4 md:p-8 overflow-x-auto shadow-[0_0_100px_rgba(0,0,0,0.8)] hide-scrollbar">
+          <div className="min-w-[800px] md:min-w-0 w-full h-full relative">
           
           {/* Tech Grid Background */}
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:3rem_3rem] pointer-events-none" />

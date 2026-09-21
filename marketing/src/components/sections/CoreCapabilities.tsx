@@ -44,8 +44,9 @@ export default function CoreCapabilities() {
   return (
     <section className="py-32 w-full overflow-hidden bg-transparent">
       <div className="w-full px-6 md:px-12 lg:px-24">
-        <motion.div 
-          className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full"
+        <div className="w-full overflow-x-auto hide-scrollbar -mx-6 px-6 md:mx-0 md:px-0 pb-8 md:pb-0">
+          <motion.div 
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 w-max md:w-full"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -55,9 +56,9 @@ export default function CoreCapabilities() {
             <motion.div 
               key={cap.id} 
               variants={cardVariants}
-              className="group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-10 overflow-hidden hover:bg-white/10 transition-all duration-500"
+              className="w-[300px] sm:w-[350px] md:w-auto flex-shrink-0 group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 lg:p-10 overflow-hidden hover:bg-white/10 transition-all duration-500"
             >
-              <div className="flex flex-col gap-6 mb-8 relative z-10">
+              <div className="flex flex-col gap-4 lg:gap-6 mb-6 lg:mb-8 relative z-10">
                 <div className="w-14 h-14 rounded-full bg-brand/20 flex items-center justify-center text-brand group-hover:scale-110 transition-transform duration-500">
                   <cap.icon className="w-6 h-6" />
                 </div>
@@ -79,7 +80,8 @@ export default function CoreCapabilities() {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
